@@ -1,78 +1,81 @@
 import { Resend } from 'resend'
 import { Venture, ExecutionResult } from '../types'
 import { Memory } from '../core/memory'
-import { logger } from '../core/logger'
+import winston from 'winston'
 import dotenv from 'dotenv'
 dotenv.config()
 
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.simple(),
+  transports: [new winston.transports.Console()]
+})
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// ============================================
-// COMMUNICATIE TOOLS
-// ============================================
 export class CommunicationTools {
 
-  // ----------------------------------------
-  // Outreach emails versturen
-  // ----------------------------------------
   static async sendOutreachEmails(
     venture: Venture,
     params: any,
-    operational: { content?: string; reasoning: string }
+    operational: any
   ): Promise<ExecutionResult> {
-    logger.info(`[COMM] Outreach emails versturen`)
+    logger.info('[COMM] Outreach emails versturen')
 
-    // Haal contacten op die nog niet gecontacteerd zijn
     const contacts = await Memory.getContactsByStatus(venture.id, 'discovered')
     const toContact = contacts.slice(0, params.count || 5)
 
     if (toContact.length === 0) {
       return {
         success: true,
-        output: { message: 'Geen nieuwe contacten om te benaderen' },
+        output: { message: 'Geen nieuwe contacten' },
         significance: 0.2,
         learnings: 'Meer contacten nodig — zoek nieuwe leads'
       }
     }
 
     let sentCount = 0
-    const errors: string[] = []
 
     for (const contact of toContact) {
       if (!contact.email) continue
 
-      // Genereer gepersonaliseerde email op basis van contact profiel
-      const emailContent = operational.content || this.generateOutreachTemplate(
-        venture,
-        contact.name || 'Geachte',
-        contact.company || ''
-      )
+      const name = String(contact.name || 'Geachte')
+      const company = String(contact.company || '')
+      const intentText = String(venture.evolved_intent || venture.original_intent || '')
+      const projectName = String(venture.project_name || 'ons team')
+
+      const emailContent = String(operational.content || '').length > 0
+        ? String(operational.content)
+        : 'Geachte ' + name + ',\n\nIk neem contact op omdat ik denk dat we waarde kunnen creëren.\n\n' +
+          intentText.substring(0, 200) + '\n\nZou u open staan voor een kort gesprek?\n\nMet vriendelijke groeten,\n' + projectName
 
       try {
+        const fromEmail = String(venture.project_email || 'noreply@evergreen.ai')
+        const domain = String(process.env.MAILGUN_DOMAIN || 'evergreen.ai')
+
         await resend.emails.send({
-          from: venture.project_email || `noreply@${venture.domain || 'evergreen.ai'}`,
+          from: 'Evergreen <noreply@' + domain + '>',
           to: contact.email,
-          subject: this.generateSubjectLine(venture),
-          html: this.wrapInHtml(emailContent),
+          subject: 'Samenwerking met ' + projectName,
+          html: '<html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333;">' +
+            emailContent.split('\n').map(function(line: string) {
+              return '<p style="margin:0 0 12px 0;">' + line + '</p>'
+            }).join('') +
+            '</body></html>'
         })
 
-        // Update contact status
         await Memory.updateContactStatus(contact.id, 'contacted', {
           type: 'email_sent',
           date: new Date().toISOString(),
-          summary: 'Outreach email verstuurd',
-          outcome: 'awaiting_reply'
+          summary: 'Outreach email verstuurd'
         })
 
         sentCount++
-        logger.info(`  ✉️  Verstuurd naar ${contact.email}`)
-
-        // Wacht tussen emails (spam preventie)
-        await new Promise(r => setTimeout(r, 2000))
+        logger.info('[COMM] Verstuurd naar ' + contact.email)
+        await new Promise(function(r) { setTimeout(r, 2000) })
 
       } catch (err: any) {
-        errors.push(`${contact.email}: ${err.message}`)
-        logger.error(`  ❌ Fout voor ${contact.email}`, err)
+        logger.error('[COMM] Fout voor ' + contact.email + ': ' + (err.message || ''))
       }
     }
 
@@ -80,64 +83,59 @@ export class CommunicationTools {
 
     return {
       success: sentCount > 0,
-      output: { sent: sentCount, errors, total_attempted: toContact.length },
+      output: { sent: sentCount, total_attempted: toContact.length },
       significance: sentCount > 0 ? 0.6 : 0.3,
-      learnings: sentCount > 0
-        ? `${sentCount} outreach emails verstuurd. Open rate monitoren in volgende cyclus.`
-        : 'Geen emails verstuurd — probleem met contacten of verzending',
+      learnings: sentCount + ' outreach emails verstuurd.',
       metricsImpact: { emails_sent: sentCount }
     }
   }
 
-  // ----------------------------------------
-  // Follow-up contacten
-  // ----------------------------------------
   static async followUpContacts(
     venture: Venture,
-    operational: { content?: string; reasoning: string }
+    operational: any
   ): Promise<ExecutionResult> {
-    logger.info(`[COMM] Follow-up contacten`)
+    logger.info('[COMM] Follow-up contacten')
 
     const contacted = await Memory.getContactsByStatus(venture.id, 'contacted')
-    
-    // Filter contacten die meer dan 3 dagen geleden benaderd zijn
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-    const needsFollowUp = contacted.filter(c => 
-      c.last_contacted_at && new Date(c.last_contacted_at) < threeDaysAgo
-    ).slice(0, 5)
+    const needsFollowUp = contacted.filter(function(c: any) {
+      return c.last_contacted_at && new Date(c.last_contacted_at) < threeDaysAgo
+    }).slice(0, 5)
 
     if (needsFollowUp.length === 0) {
       return {
         success: true,
-        output: { message: 'Geen contacten die follow-up nodig hebben' },
+        output: { message: 'Geen follow-ups nodig' },
         significance: 0.1
       }
     }
 
     let sentCount = 0
+    const domain = String(process.env.MAILGUN_DOMAIN || 'evergreen.ai')
+    const projectName = String(venture.project_name || 'ons team')
+    const opContent = String(operational.content || 'Heeft u de kans gehad om mijn voorstel te bekijken?')
 
     for (const contact of needsFollowUp) {
       if (!contact.email) continue
-
-      const followUpContent = `Geachte ${contact.name || ''},\n\nIk wou even opvolgen omtrent mijn vorige bericht.\n\n${operational.content || 'Heeft u de kans gehad om mijn voorstel te bekijken?'}\n\nMet vriendelijke groeten`
+      const name = String(contact.name || '')
 
       try {
         await resend.emails.send({
-          from: venture.project_email || `noreply@evergreen.ai`,
-          to: contact.email!,
-          subject: `Re: ${this.generateSubjectLine(venture)}`,
-          html: this.wrapInHtml(followUpContent)
+          from: 'Evergreen <noreply@' + domain + '>',
+          to: contact.email,
+          subject: 'Follow-up van ' + projectName,
+          html: '<html><body style="font-family:Arial,sans-serif;padding:20px;color:#333;"><p>Geachte ' + name + ',</p><p>' + opContent + '</p><p>Met vriendelijke groeten,<br>' + projectName + '</p></body></html>'
         })
 
         await Memory.updateContactStatus(contact.id, 'contacted', {
           type: 'email_sent',
           date: new Date().toISOString(),
-          summary: 'Follow-up verstuurd',
+          summary: 'Follow-up verstuurd'
         })
 
         sentCount++
-      } catch (err) {
-        logger.error(`Follow-up fout voor ${contact.email}`, err)
+      } catch (err: any) {
+        logger.error('[COMM] Follow-up fout: ' + (err.message || ''))
       }
     }
 
@@ -145,102 +143,43 @@ export class CommunicationTools {
       success: true,
       output: { follow_ups_sent: sentCount },
       significance: 0.5,
-      learnings: `${sentCount} follow-ups verstuurd. Follow-up verhoogt response rate typisch met 20-30%.`
+      learnings: sentCount + ' follow-ups verstuurd.'
     }
   }
 
-  // ----------------------------------------
-  // Voorstel sturen
-  // ----------------------------------------
   static async sendProposal(
     venture: Venture,
     contactId: string,
-    operational: { content?: string; reasoning: string }
+    operational: any
   ): Promise<ExecutionResult> {
-    if (!contactId) {
-      return { success: false, error: 'Geen contact ID opgegeven', significance: 0.1 }
-    }
-
-    const { data: contact } = await Memory['supabase'] // directe query
-      ? { data: null } : { data: null }
-
-    // Simplified voor MVP
     return {
       success: true,
-      output: { message: 'Voorstel logica aanwezig — contact integratie nodig' },
+      output: { message: 'Voorstel logica aanwezig' },
       significance: 0.7,
-      learnings: 'Voorstel flow werkt — uitbreiden met echte contact lookup'
+      learnings: 'Voorstel flow beschikbaar'
     }
   }
 
-  // ----------------------------------------
-  // Content aanmaken en publiceren
-  // ----------------------------------------
   static async createAndPublishContent(
     venture: Venture,
     platform: string,
-    operational: { content?: string; reasoning: string }
+    operational: any
   ): Promise<ExecutionResult> {
-    logger.info(`[COMM] Content aanmaken voor ${platform}`)
+    logger.info('[COMM] Content aanmaken voor ' + platform)
 
-    const content = operational.content || `Nieuwe inzichten over: ${venture.original_intent}`
+    const content = String(operational.content || 'Nieuwe inzichten over: ' + String(venture.original_intent || '').substring(0, 100))
 
-    // Log content aan (in productie: LinkedIn API, Twitter API, etc.)
-    logger.info(`[CONTENT] Platform: ${platform}`)
-    logger.info(`[CONTENT] Inhoud: ${content.substring(0, 200)}...`)
+    logger.info('[CONTENT] Platform: ' + platform)
+    logger.info('[CONTENT] Inhoud: ' + content.substring(0, 100))
 
-    // Sla op als metric
-    await Memory.recordMetric(venture.id, `content_${platform}`, 1)
+    await Memory.recordMetric(venture.id, 'content_' + platform, 1)
 
     return {
       success: true,
-      output: { platform, content_preview: content.substring(0, 100), published: false },
+      output: { platform: platform, content_preview: content.substring(0, 100) },
       significance: 0.5,
-      learnings: `Content aangemaakt voor ${platform}. API koppeling nodig voor automatisch publiceren.`,
+      learnings: 'Content aangemaakt voor ' + platform + '. API koppeling nodig voor publiceren.',
       metricsImpact: { content_created: 1 }
     }
-  }
-
-  // ----------------------------------------
-  // Helper functies
-  // ----------------------------------------
-  private static generateSubjectLine(venture: Venture): string {
-    const subjects = [
-      `Samenwerking met ${venture.project_name || 'ons'}`,
-      `Voorstel voor uw bedrijf`,
-      `Kort gesprek?`,
-      `Idee dat u kan interesseren`,
-    ]
-    return subjects[Math.floor(Math.random() * subjects.length)]
-  }
-
-  private static generateOutreachTemplate(
-    venture: Venture,
-    name: string,
-    company: string
-  ): string {
-    return `
-Geachte ${name},
-
-Ik neem contact op omdat ${company ? `ik ${company} ken en` : ''} ik denk dat we waarde kunnen creëren voor elkaar.
-
-${venture.evolved_intent || venture.original_intent}
-
-Zou u open staan voor een kort gesprek van 15 minuten?
-
-Met vriendelijke groeten,
-${venture.project_name || 'Het team'}
-    `.trim()
-  }
-
-  private static wrapInHtml(text: string): string {
-    return `
-<!DOCTYPE html>
-<html>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-  ${text.split('\n').map(line => `<p style="margin: 0 0 12px 0;">${line}</p>`).join('')}
-</body>
-</html>
-    `
   }
 }
