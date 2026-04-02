@@ -12,11 +12,11 @@ body{background:var(--dark);color:var(--text);font-family:'Syne',sans-serif;min-
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 .wrap{max-width:720px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
 header{padding:28px 16px 20px;border-bottom:1px solid var(--border)}
-.header-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hi{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
-.logo-text{font-size:20px;font-weight:800;letter-spacing:-0.02em}
-.logo-text span{color:var(--gold)}
+.ld{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+.lt{font-size:20px;font-weight:800;letter-spacing:-0.02em}
+.lt span{color:var(--gold)}
 .srv{display:flex;align-items:center;gap:8px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
 .sdot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
 .sdot.alive{background:var(--green);animation:pulse 2s infinite}
@@ -94,15 +94,15 @@ header{padding:28px 16px 20px;border-bottom:1px solid var(--border)}
 </head>
 <body>
 <header>
-<div class="header-inner">
-<div class="logo"><div class="logo-dot"></div><div class="logo-text">Ever<span>green</span></div></div>
+<div class="hi">
+<div class="logo"><div class="ld"></div><div class="lt">Ever<span>green</span></div></div>
 <div class="srv"><div class="sdot" id="sdot"></div><span id="stxt">verbinden...</span></div>
 </div>
 </header>
 <div class="wrap pb-24">
 <div class="tabs">
-<div class="tab active" onclick="tab('ventures')">Ventures</div>
-<div class="tab" onclick="tab('new')">+ Nieuw</div>
+<div class="tab active" onclick="goTab('ventures')">Ventures</div>
+<div class="tab" onclick="goTab('new')">+ Nieuw</div>
 </div>
 <div class="panel active" id="panel-ventures">
 <div id="detail-view" style="display:none"><div class="back" onclick="closeD()">&#8592; Terug</div><div id="dc"></div></div>
@@ -123,28 +123,30 @@ header{padding:28px 16px 20px;border-bottom:1px solid var(--border)}
 <button class="btn btn-gold" id="lbtn" onclick="launch()">&#127807; Venture lanceren</button>
 </div>
 <div class="card" style="background:transparent;border-color:rgba(200,169,110,.1);cursor:pointer" onclick="useEx()">
-<div class="ct">Voorbeeld</div>
+<div class="ct">Voorbeeld &#8212; klik om te gebruiken</div>
 <div style="font-size:13px;color:var(--muted);line-height:1.7">"Zoek 10 Belgische accountantskantoren die nood hebben aan digitale tools en contacteer ze. Focus op Oost- en West-Vlaanderen."</div>
 </div>
 </div>
 </div>
 <div id="toast"></div>
 <script>
-var S = '__SERVER_URL__';
-var sel = null;
+var sel=null;
+
+function api(path,opts){
+  return fetch(path,opts).then(function(r){return r.json()});
+}
 
 function health(){
   var dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
-  fetch(S+'/health').then(function(r){
-    if(r.ok){dot.className='sdot alive';txt.textContent='online'}
-    else throw 0;
+  fetch('/health').then(function(r){
+    if(r.ok){dot.className='sdot alive';txt.textContent='online'}else throw 0;
   }).catch(function(){dot.className='sdot';txt.textContent='offline'});
 }
 
-function tab(t){
-  var tabs=document.querySelectorAll('.tab');
-  var names=['ventures','new'];
-  tabs.forEach(function(el,i){el.classList.toggle('active',names[i]===t)});
+function goTab(t){
+  document.querySelectorAll('.tab').forEach(function(el,i){
+    el.classList.toggle('active',['ventures','new'][i]===t);
+  });
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
   document.getElementById('panel-'+t).classList.add('active');
   if(t==='ventures')loadV();
@@ -155,18 +157,19 @@ function loadV(silent){
     document.getElementById('ri').classList.add('spin');
     document.getElementById('vlist').innerHTML='<div class="loading">Laden...</div>';
   }
-  fetch(S+'/ventures').then(function(r){return r.json()}).then(function(d){
+  api('/ventures').then(function(d){
     renderV(d.ventures||[]);
   }).catch(function(){
     document.getElementById('vlist').innerHTML='<div class="empty"><div class="empty-i">&#9888;</div><p>Kan server niet bereiken</p></div>';
-  }).finally(function(){
-    document.getElementById('ri').classList.remove('spin');
-  });
+  }).finally(function(){document.getElementById('ri').classList.remove('spin')});
 }
 
 function renderV(list){
   var el=document.getElementById('vlist');
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-i">&#127807;</div><p>Nog geen ventures</p></div>';return}
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="empty-i">&#127807;</div><p>Nog geen ventures. Maak je eerste aan.</p></div>';
+    return;
+  }
   el.innerHTML=list.map(function(v){
     var pct=Math.min(100,Math.round(((v.budget_spent||0)/v.budget_total)*100));
     return '<div class="vc'+(sel===v.id?' sel':'')+'" onclick="openD(\''+v.id+'\')">'+
@@ -178,7 +181,9 @@ function renderV(list){
       '<div class="st"><div class="sv">&#8364;'+(v.revenue_total||0)+'</div><div class="sl">Omzet</div></div>'+
       '<div class="st"><div class="sv">&#8364;'+(v.budget_total-(v.budget_spent||0)).toFixed(0)+'</div><div class="sl">Budget</div></div>'+
       '<div class="st"><div class="sv">'+v.loop_count+'</div><div class="sl">Cycli</div></div>'+
-      '</div><div class="bb"><div class="bf" style="width:'+pct+'%"></div></div></div>';
+      '</div>'+
+      '<div class="bb"><div class="bf" style="width:'+pct+'%"></div></div>'+
+      '</div>';
   }).join('');
 }
 
@@ -187,7 +192,7 @@ function openD(id){
   document.getElementById('list-view').style.display='none';
   document.getElementById('detail-view').style.display='block';
   document.getElementById('dc').innerHTML='<div class="loading">Laden...</div>';
-  fetch(S+'/ventures/'+id).then(function(r){return r.json()}).then(function(d){renderD(d)}).catch(function(){
+  api('/ventures/'+id).then(function(d){renderD(d)}).catch(function(){
     document.getElementById('dc').innerHTML='<div class="empty"><p>Fout bij laden</p></div>';
   });
 }
@@ -203,67 +208,79 @@ function renderD(data){
   var v=data.venture,m=data.metrics||{},dec=data.recent_decisions||[],lea=data.recent_learnings||[],br=data.budget_remaining||0;
   var pct=Math.min(100,Math.round(((v.budget_total-br)/v.budget_total)*100));
   var ip=v.status==='paused';
-  var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px">'+
+  var h='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px">'+
     '<div><h2 style="font-size:20px;font-weight:800">'+(v.project_name||'Opstarten...')+'</h2>'+
-    '<div class="li" style="margin-top:4px"><span class="vs s-'+v.status+'">'+v.status.toUpperCase()+'</span><span class="pb">'+v.phase+'</span><span>Loop #'+v.loop_count+'</span></div></div>'+
-    '<button class="btn btn-sm btn-outline" onclick="'+(ip?'resumeV':'pauseV')+'(\''+v.id+'\')">'+(ip?'&#9654; Hervatten':'&#9646;&#9646; Pauzeren')+'</button></div>'+
+    '<div class="li" style="margin-top:4px">'+
+    '<span class="vs s-'+v.status+'">'+v.status.toUpperCase()+'</span>'+
+    '<span class="pb">'+v.phase+'</span>'+
+    '<span>Loop #'+v.loop_count+'</span></div></div>'+
+    '<button class="btn btn-sm btn-outline" onclick="'+(ip?'resumeV':'pauseV')+'(\''+v.id+'\')">'+
+    (ip?'&#9654; Hervatten':'&#9646;&#9646; Pauzeren')+'</button></div>'+
     '<div class="ds"><div class="dt">Intentie</div>'+
-    '<div style="font-size:14px;color:#aaa;line-height:1.7;background:#0a0a0a;padding:13px;border-radius:8px">'+(v.evolved_intent||v.original_intent)+'</div></div>'+
-    '<div class="ds"><div class="dt">Budget</div>'+
-    '<div class="mg">'+
+    '<div style="font-size:14px;color:#aaa;line-height:1.7;background:#0a0a0a;padding:13px;border-radius:8px">'+
+    (v.evolved_intent||v.original_intent)+'</div></div>'+
+    '<div class="ds"><div class="dt">Budget</div><div class="mg">'+
     '<div class="mi"><div class="mv">&#8364;'+br.toFixed(2)+'</div><div class="ml">Resterend</div></div>'+
     '<div class="mi"><div class="mv">&#8364;'+(v.revenue_total||0)+'</div><div class="ml">Omzet</div></div>'+
     '<div class="mi"><div class="mv">&#8364;'+(v.budget_spent||0)+'</div><div class="ml">Uitgegeven</div></div>'+
     '<div class="mi"><div class="mv">&#8364;'+v.budget_total+'</div><div class="ml">Totaal</div></div>'+
-    '</div><div class="bb" style="height:8px;margin-top:12px"><div class="bf" style="width:'+pct+'%"></div></div></div>';
+    '</div><div class="bb" style="height:8px;margin-top:12px">'+
+    '<div class="bf" style="width:'+pct+'%"></div></div></div>';
 
   if(Object.keys(m).length){
-    html+='<div class="ds"><div class="dt">Metrics</div><div class="mg">';
+    h+='<div class="ds"><div class="dt">Metrics</div><div class="mg">';
     Object.entries(m).slice(0,6).forEach(function(e){
-      html+='<div class="mi"><div class="mv">'+(typeof e[1]==='number'?e[1].toFixed(0):e[1])+'</div><div class="ml">'+e[0].replace(/_/g,' ')+'</div></div>';
+      h+='<div class="mi"><div class="mv">'+(typeof e[1]==='number'?e[1].toFixed(0):e[1])+'</div>'+
+        '<div class="ml">'+String(e[0]).replace(/_/g,' ')+'</div></div>';
     });
-    html+='</div></div>';
+    h+='</div></div>';
   }
 
-  html+='<div class="ds"><div class="dt">Beslissingen ('+dec.length+')</div>';
+  h+='<div class="ds"><div class="dt">Beslissingen ('+dec.length+')</div>';
   if(dec.length){
-    html+='<div class="scrl">';
+    h+='<div class="scrl">';
     dec.forEach(function(d){
-      html+='<div class="di'+(d.success===true?' ok':d.success===false?' fail':'')+'">'+
-        '<div class="dtype">'+d.level.toUpperCase()+' - '+d.action_type+' '+(d.success===true?'&#10003;':d.success===false?'&#10007;':'&#8987;')+'</div>'+
+      h+='<div class="di'+(d.success===true?' ok':d.success===false?' fail':'')+'">'+
+        '<div class="dtype">'+d.level.toUpperCase()+' - '+d.action_type+
+        ' '+(d.success===true?'&#10003;':d.success===false?'&#10007;':'&#8987;')+'</div>'+
         '<div class="dreason">'+trunc(d.reasoning,150)+'</div>'+
         (d.learnings?'<div class="dlearn">&#8594; '+trunc(d.learnings,100)+'</div>':'')+
         '</div>';
     });
-    html+='</div>';
-  } else html+='<div style="color:var(--muted);font-size:13px">Nog geen beslissingen</div>';
-  html+='</div>';
+    h+='</div>';
+  } else h+='<div style="color:var(--muted);font-size:13px">Nog geen beslissingen</div>';
+  h+='</div>';
 
-  html+='<div class="ds"><div class="dt">Inzichten ('+lea.length+')</div>';
+  h+='<div class="ds"><div class="dt">Inzichten ('+lea.length+')</div>';
   if(lea.length){
-    html+='<div class="scrl">';
+    h+='<div class="scrl">';
     lea.forEach(function(l){
-      html+='<div class="lea"><div class="lcat">'+l.category+'</div>'+l.insight+'</div>';
+      h+='<div class="lea"><div class="lcat">'+l.category+'</div>'+l.insight+'</div>';
     });
-    html+='</div>';
-  } else html+='<div style="color:var(--muted);font-size:13px">Nog geen inzichten</div>';
-  html+='</div>';
+    h+='</div>';
+  } else h+='<div style="color:var(--muted);font-size:13px">Nog geen inzichten</div>';
+  h+='</div>';
 
-  html+='<div class="ds"><div class="dt">Tijdlijn</div>'+
+  h+='<div class="ds"><div class="dt">Tijdlijn</div>'+
     '<div style="font-size:12px;font-family:IBM Plex Mono,monospace;color:var(--muted);line-height:2.2">'+
     '<div>Aangemaakt: '+fmtD(v.created_at)+'</div>'+
     '<div>Laatste activiteit: '+fmtD(v.last_active_at)+'</div>'+
     (v.last_loop_at?'<div>Laatste loop: '+fmtD(v.last_loop_at)+'</div>':'')+
     '</div></div>';
 
-  document.getElementById('dc').innerHTML=html;
+  document.getElementById('dc').innerHTML=h;
 }
 
 function pauseV(id){
-  fetch(S+'/ventures/'+id+'/pause',{method:'POST'}).then(function(){toast('Gepauzeerd','ok');openD(id)}).catch(function(){toast('Fout','err')});
+  fetch('/ventures/'+id+'/pause',{method:'POST'})
+    .then(function(){toast('Gepauzeerd','ok');openD(id)})
+    .catch(function(){toast('Fout','err')});
 }
+
 function resumeV(id){
-  fetch(S+'/ventures/'+id+'/resume',{method:'POST'}).then(function(){toast('Hervat','ok');openD(id)}).catch(function(){toast('Fout','err')});
+  fetch('/ventures/'+id+'/resume',{method:'POST'})
+    .then(function(){toast('Hervat','ok');openD(id)})
+    .catch(function(){toast('Fout','err')});
 }
 
 function launch(){
@@ -275,23 +292,37 @@ function launch(){
   if(!email){toast('E-mail verplicht','err');return}
   var btn=document.getElementById('lbtn');
   btn.disabled=true;btn.textContent='Lanceren...';
-  fetch(S+'/ventures',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({intent:intent,budget:budget,approval_threshold:threshold,owner_email:email})})
-    .then(function(r){return r.json()})
-    .then(function(d){
-      if(d.success){toast('Venture gelanceerd!','ok');document.getElementById('intent').value='';tab('ventures');setTimeout(loadV,2000)}
-      else toast(d.error||'Fout','err');
-    }).catch(function(){toast('Kan server niet bereiken','err')})
-    .finally(function(){btn.disabled=false;btn.textContent='Venture lanceren'});
+  fetch('/ventures',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({intent:intent,budget:budget,approval_threshold:threshold,owner_email:email})
+  }).then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      toast('Venture gelanceerd!','ok');
+      document.getElementById('intent').value='';
+      goTab('ventures');
+      setTimeout(loadV,2000);
+    } else toast(d.error||'Fout','err');
+  }).catch(function(){toast('Kan server niet bereiken','err')})
+  .finally(function(){btn.disabled=false;btn.textContent='Venture lanceren'});
 }
 
-function useEx(){document.getElementById('intent').value='Zoek 10 Belgische accountantskantoren die nood hebben aan digitale tools en contacteer ze. Focus op Oost- en West-Vlaanderen.';tab('new')}
+function useEx(){
+  document.getElementById('intent').value='Zoek 10 Belgische accountantskantoren die nood hebben aan digitale tools en contacteer ze. Focus op Oost- en West-Vlaanderen.';
+  goTab('new');
+}
+
 function trunc(s,n){if(!s)return '';return s.length>n?s.substring(0,n)+'...':s}
 function fmtD(iso){if(!iso)return '-';var d=new Date(iso);return d.toLocaleDateString('nl-BE')+' '+d.toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'})}
-function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='show '+type;setTimeout(function(){el.className=''},3000)}
+function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');setTimeout(function(){el.className=''},3000)}
 
-health();loadV();
-setInterval(function(){if(document.getElementById('panel-ventures').classList.contains('active')){sel?openD(sel):loadV(true)}},30000);
+health();
+loadV();
+setInterval(function(){
+  if(document.getElementById('panel-ventures').classList.contains('active')){
+    if(sel)openD(sel);else loadV(true);
+  }
+},30000);
 </script>
 </body>
 </html>
-
