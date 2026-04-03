@@ -4,56 +4,55 @@ import { CommunicationTools } from '../tools/communication'
 import { ResearchTools } from '../tools/research'
 import { InfrastructureTools } from '../tools/infrastructure'
 import { FinancialTools } from '../tools/financial'
-import { logger } from './logger'
+import { SelfImprovementTools } from '../tools/selfimprove'
+import winston from 'winston'
+import dotenv from 'dotenv'
+dotenv.config()
 
-// ============================================
-// EXECUTOR — Vertaalt beslissingen naar acties
-// ============================================
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.simple(),
+  transports: [new winston.transports.Console()]
+})
+
 export class Executor {
 
   static async execute(venture: Venture, action: PlannedAction): Promise<ExecutionResult> {
-    logger.info(`[EXECUTOR] ${action.type}`)
+    const actionType = String(action.type || '')
+    logger.info('[EXECUTOR] ' + actionType)
 
     try {
-      // Genereer concrete uitvoering via operationeel denken
       const operational = await ThinkEngine.operationalThink(
         venture,
-        action.type,
-        action.params,
-        `Venture fase: ${venture.phase}, Loop count: ${venture.loop_count}`
+        actionType,
+        action.params || {},
+        'Venture fase: ' + venture.phase + ', Loop: ' + venture.loop_count
       )
 
-      // Voer uit op basis van actie type
-      switch (action.type) {
+      switch (actionType) {
 
-        // ----------------------------------------
-        // RESEARCH
-        // ----------------------------------------
         case 'research_market':
           return await ResearchTools.researchMarket(
             venture,
-            action.params.query || venture.original_intent,
+            String(action.params?.query || venture.original_intent || ''),
             operational
           )
 
         case 'find_contacts':
           return await ResearchTools.findContacts(
             venture,
-            action.params.criteria,
-            action.params.count || 10,
+            String(action.params?.criteria || action.params?.query || venture.original_intent || ''),
+            Number(action.params?.count) || 10,
             operational
           )
 
         case 'analyze_results':
           return await ResearchTools.analyzeResults(venture, operational)
 
-        // ----------------------------------------
-        // COMMUNICATIE
-        // ----------------------------------------
         case 'send_outreach_email':
           return await CommunicationTools.sendOutreachEmails(
             venture,
-            action.params,
+            action.params || {},
             operational
           )
 
@@ -63,40 +62,46 @@ export class Executor {
         case 'send_proposal':
           return await CommunicationTools.sendProposal(
             venture,
-            action.params.contact_id,
+            String(action.params?.contact_id || ''),
             operational
           )
 
         case 'create_content':
           return await CommunicationTools.createAndPublishContent(
             venture,
-            action.params.platform || 'linkedin',
+            String(action.params?.platform || 'linkedin'),
             operational
           )
 
-        // ----------------------------------------
-        // INFRASTRUCTUUR
-        // ----------------------------------------
         case 'setup_infrastructure':
           return await InfrastructureTools.setupBasicInfrastructure(venture, operational)
 
         case 'build_feature':
           return await InfrastructureTools.buildAndDeploy(
             venture,
-            action.params.feature,
+            String(action.params?.feature || ''),
             operational
           )
 
-        // ----------------------------------------
-        // FINANCIEEL
-        // ----------------------------------------
         case 'create_invoice':
           return await FinancialTools.createInvoice(
             venture,
-            action.params.contact_id,
-            action.params.amount,
-            action.params.description,
+            String(action.params?.contact_id || ''),
+            Number(action.params?.amount) || 0,
+            String(action.params?.description || ''),
             operational
+          )
+
+        case 'self_improve':
+        case 'fix_bugs':
+        case 'improve_code':
+          return await SelfImprovementTools.analyzeAndFix(venture)
+
+        case 'hotfix':
+          return await SelfImprovementTools.pushHotfix(
+            venture,
+            String(action.params?.file || ''),
+            String(action.params?.description || operational.reasoning)
           )
 
         case 'request_budget_approval':
@@ -110,26 +115,28 @@ export class Executor {
         case 'update_strategy':
           return {
             success: true,
-            output: { reasoning: operational.reasoning },
+            output: { reasoning: String(operational.reasoning || '') },
             significance: 0.7,
-            learnings: operational.reasoning
+            learnings: String(operational.reasoning || '').substring(0, 200)
           }
 
         default:
-          logger.warn(`Onbekend actie type: ${action.type}`)
+          logger.warn('Onbekend actie type: ' + actionType)
           return {
             success: false,
-            error: `Onbekend actie type: ${action.type}`,
-            significance: 0.1
+            error: 'Onbekend actie type: ' + actionType,
+            significance: 0.1,
+            learnings: 'Actie type "' + actionType + '" bestaat niet. Gebruik bekende types.'
           }
       }
     } catch (err: any) {
-      logger.error(`Executor fout voor ${action.type}`, err)
+      const msg = String(err.message || 'Onbekende fout')
+      logger.error('Executor fout voor ' + actionType + ': ' + msg)
       return {
         success: false,
-        error: err.message || 'Onbekende fout',
+        error: msg,
         significance: 0.3,
-        learnings: `${action.type} mislukte: ${err.message}. Aanpak herzien in volgende cyclus.`
+        learnings: actionType + ' mislukte: ' + msg.substring(0, 150) + '. Aanpak herzien in volgende cyclus.'
       }
     }
   }
