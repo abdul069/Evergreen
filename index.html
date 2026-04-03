@@ -15,126 +15,120 @@ header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 2
 .hmeta{font-size:10px;color:var(--muted);display:flex;gap:12px;align-items:center}
 .rbtn{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font);font-size:9px;padding:3px 10px;cursor:pointer}
 #status-panel{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:40vh;overflow-y:auto}
-.status-loading{color:var(--muted);font-size:11px;font-style:italic}
-.status-content{font-size:12px;line-height:1.8;color:var(--text2)}
-.status-content b{color:var(--green)}
-.stats-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.stat{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px}
-.stat-val{font-size:20px;font-weight:700;color:var(--green);display:block}
-.stat-lbl{color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
-#chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:88%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
-.msg.user{align-self:flex-end;background:#0f2035;border:1px solid #1a3550;color:var(--cyan)}
-.msg.ai{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
-.msg.ai b{color:var(--green)}
-.msg.sys{align-self:center;color:var(--muted);font-size:10px;letter-spacing:1px}
-.msg.cmd{align-self:flex-end;background:#002218;border:1px solid #004030;color:var(--green)}
+.sl{color:var(--muted);font-size:11px;font-style:italic}
+.sc{font-size:12px;line-height:1.8;color:var(--text2)}
+.sc b{color:var(--green)}
+.sr{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.st{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px}
+.sv{font-size:20px;font-weight:700;color:var(--green);display:block}
+.sl2{color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+#chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:88%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
+.m.u{align-self:flex-end;background:#0f2035;border:1px solid #1a3550;color:var(--cyan)}
+.m.a{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.m.a b{color:var(--green)}
+.m.s{align-self:center;color:var(--muted);font-size:10px;letter-spacing:1px}
+.m.c{align-self:flex-end;background:#002218;border:1px solid #004030;color:var(--green)}
+.m.ac{background:#001a10;border-color:#003020;font-size:11px}
 .typing{display:flex;gap:4px;align-items:center}
 .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s ease-in-out infinite}
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
-#input-area{border-top:1px solid var(--border);padding:12px 20px;flex-shrink:0;background:var(--bg)}
-.input-row{display:flex;gap:8px;align-items:flex-end}
-#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;padding:10px 14px;resize:none;outline:none;max-height:100px;min-height:40px}
-#msg-input:focus{border-color:var(--cyan)}
-#msg-input::placeholder{color:var(--muted)}
-.send-btn{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer}
-.hint{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+#ia{border-top:1px solid var(--border);padding:12px 20px;flex-shrink:0;background:var(--bg)}
+.ir{display:flex;gap:8px;align-items:flex-end}
+#mi{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;padding:10px 14px;resize:none;outline:none;max-height:100px;min-height:40px}
+#mi:focus{border-color:var(--cyan)}
+#mi::placeholder{color:var(--muted)}
+.sb{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer}
+.hint{font-size:9px;color:var(--muted);margin-top:6px}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.8)}}
 @keyframes blink{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-@media(max-width:600px){#status-panel{max-height:35vh}.stats-row{gap:8px}#main{padding:14px 16px}}
+@media(max-width:600px){#status-panel{max-height:35vh}.sr{gap:8px}#ia{padding:10px 14px}}
 </style>
 </head>
 <body>
 <header>
   <div class="logo"><div class="dot"></div>EVERGREEN</div>
-  <div class="hmeta">
-    <span id="upd"></span>
-    <button class="rbtn" onclick="loadStatus()">↻ status</button>
-  </div>
+  <div class="hmeta"><span id="upd"></span><button class="rbtn" onclick="loadStatus()">↻ status</button></div>
 </header>
-
-<div id="status-panel"><div class="status-loading">Laden...</div></div>
-
-<div id="chat-area">
-  <div class="msg sys">Stel een vraag of geef een commando aan Evergreen</div>
-</div>
-
-<div id="input-area">
-  <div class="input-row">
-    <textarea id="msg-input" placeholder="Vraag iets of typ een commando (/pause /resume /pivot)" rows="1"></textarea>
-    <button class="send-btn" onclick="send()">➤</button>
+<div id="status-panel"><div class="sl">Laden...</div></div>
+<div id="chat"><div class="m s">Geef instructies of stel vragen. Ik voer het direct uit.</div></div>
+<div id="ia">
+  <div class="ir">
+    <textarea id="mi" placeholder="Zeg wat Evergreen moet doen..." rows="1"></textarea>
+    <button class="sb" onclick="send()">➤</button>
   </div>
-  <div class="hint">Commando's: /pause · /resume · /status · /pivot [richting]</div>
+  <div class="hint">Alles wat je zegt wordt direct uitgevoerd in het systeem.</div>
 </div>
 
 <script>
-let data = null
-let history = []
+let data = null, history = [], ventureId = null
 
 async function api(params, body) {
   const q = new URLSearchParams(params).toString()
-  const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}
+  const opts = body ? { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) } : {}
   const r = await fetch('/api?' + q, opts)
   return r.json()
 }
 
 async function loadStatus() {
-  document.getElementById('status-panel').innerHTML = '<div class="status-loading">Status laden...</div>'
+  document.getElementById('status-panel').innerHTML = '<div class="sl">Status laden...</div>'
   try {
     const [ventures, decisions, learnings] = await Promise.all([
-      api({ action: 'data', table: 'ventures', q: 'select=*&status=eq.active&order=created_at.desc' }),
-      api({ action: 'data', table: 'decisions', q: 'select=*&order=created_at.desc&limit=15' }),
-      api({ action: 'data', table: 'learnings', q: 'select=*&order=created_at.desc&limit=10' })
+      api({action:'data', table:'ventures', q:'select=*&status=eq.active&order=created_at.desc'}),
+      api({action:'data', table:'decisions', q:'select=*&order=created_at.desc&limit=15'}),
+      api({action:'data', table:'learnings', q:'select=*&order=created_at.desc&limit=10'})
     ])
-    data = { ventures, decisions, learnings }
-    const ctx = buildContext(data)
+    data = {ventures, decisions, learnings}
     const v = ventures?.[0]
+    if (v) ventureId = v.id
 
-    const resp = await api({ action: 'chat' }, {
-      system: 'Jij bent de assistent van Evergreen, een autonoom AI dat een digitaal product zoekt en bouwt. Geef een korte samenvatting (max 3 zinnen) in gewone Nederlandse taal. Geen technisch jargon. Huidige staat:\n\n' + ctx,
-      messages: [{ role: 'user', content: 'Wat doet Evergreen nu en gaat het goed?' }]
+    const ctx = buildCtx(data)
+    const resp = await api({action:'chat'}, {
+      system: 'Geef een korte samenvatting (max 2 zinnen) in gewone Nederlandse taal van de huidige staat van Evergreen. Geen jargon.\n\n' + ctx,
+      messages: [{role:'user', content:'Wat doet Evergreen nu?'}]
     })
-    const summary = resp.content?.[0]?.text || 'Kon status niet laden'
+    const summary = resp.content?.[0]?.text || ''
+    const budget = v ? (v.budget_total - (v.budget_spent||0)).toFixed(0) : '—'
 
-    const budget = v ? (v.budget_total - (v.budget_spent || 0)).toFixed(0) : '—'
     document.getElementById('status-panel').innerHTML = `
-      <div class="status-content">${md(summary)}</div>
-      <div class="stats-row">
-        <div class="stat"><span class="stat-lbl">TICK</span><span class="stat-val">#${v?.loop_count || 0}</span></div>
-        <div class="stat"><span class="stat-lbl">BUDGET</span><span class="stat-val">€${budget}</span></div>
-        <div class="stat"><span class="stat-lbl">OMZET</span><span class="stat-val">€${(v?.revenue_total || 0).toFixed(0)}</span></div>
-        <div class="stat"><span class="stat-lbl">INTERVAL</span><span class="stat-val">${v?.loop_interval_minutes || '—'}m</span></div>
+      <div class="sc">${md(summary)}</div>
+      <div class="sr">
+        <div class="st"><span class="sl2">TICK</span><span class="sv">#${v?.loop_count||0}</span></div>
+        <div class="st"><span class="sl2">BUDGET</span><span class="sv">€${budget}</span></div>
+        <div class="st"><span class="sl2">OMZET</span><span class="sv">€${(v?.revenue_total||0).toFixed(0)}</span></div>
+        <div class="st"><span class="sl2">INTERVAL</span><span class="sv">${v?.loop_interval_minutes||'—'}m</span></div>
       </div>`
-    document.getElementById('upd').textContent = 'bijgewerkt ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })
-  } catch (e) {
-    document.getElementById('status-panel').innerHTML = '<div class="status-loading" style="color:var(--red)">Fout: ' + e.message + '</div>'
+    document.getElementById('upd').textContent = 'bijgewerkt ' + new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'})
+  } catch(e) {
+    document.getElementById('status-panel').innerHTML = '<div class="sl" style="color:var(--red)">Fout: ' + e.message + '</div>'
   }
 }
 
-function buildContext(d) {
+function buildCtx(d) {
   const v = d.ventures?.[0]
   if (!v) return 'Geen actieve ventures.'
   const dec = d.decisions?.filter(x => x.venture_id === v.id) || []
   const lea = d.learnings?.filter(x => x.venture_id === v.id) || []
-  return `VENTURE: ${v.project_name} TICK #${v.loop_count}
+  return `VENTURE ID: ${v.id}
+NAAM: ${v.project_name} TICK #${v.loop_count}
 INTENTIE: ${v.evolved_intent || v.original_intent}
-FASE: ${v.phase} | BUDGET: €${(v.budget_total - (v.budget_spent || 0)).toFixed(0)} | OMZET: €${(v.revenue_total || 0).toFixed(0)}
-CONTACTEN: ${v.contacts_discovered || 0} gevonden
+FASE: ${v.phase} | BUDGET TOTAAL: €${v.budget_total} | BUDGET UITGEGEVEN: €${v.budget_spent||0} | OMZET: €${v.revenue_total||0}
+INTERVAL: ${v.loop_interval_minutes}m
 
 RECENTE ACTIES:
-${dec.slice(0, 8).map(d => `- ${d.action_type}: ${d.success ? 'OK' : 'FOUT'} | ${(d.reasoning || '').substring(0, 100)}`).join('\n')}
+${dec.slice(0,8).map(d=>`- ${d.action_type}: ${d.success?'OK':'FOUT'} | ${(d.reasoning||'').substring(0,100)}`).join('\n')}
 
 INZICHTEN:
-${lea.slice(0, 5).map(l => `- ${(l.insight || '').substring(0, 120)}`).join('\n')}`
+${lea.slice(0,5).map(l=>`- ${(l.insight||'').substring(0,120)}`).join('\n')}`
 }
 
-function md(t) { return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>') }
+function md(t) { return t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>') }
 
 function addMsg(text, type) {
-  const chat = document.getElementById('chat-area')
+  const chat = document.getElementById('chat')
   const div = document.createElement('div')
-  div.className = 'msg ' + type
+  div.className = 'm ' + type
   div.innerHTML = md(text)
   chat.appendChild(div)
   chat.scrollTop = chat.scrollHeight
@@ -142,89 +136,122 @@ function addMsg(text, type) {
 }
 
 function addTyping() {
-  const chat = document.getElementById('chat-area')
+  const chat = document.getElementById('chat')
   const div = document.createElement('div')
-  div.className = 'msg ai'
+  div.className = 'm a'
   div.id = 'typing'
   div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>'
   chat.appendChild(div)
   chat.scrollTop = chat.scrollHeight
 }
-
 function removeTyping() { document.getElementById('typing')?.remove() }
 
-async function handleCmd(cmd) {
-  const parts = cmd.trim().split(' ')
-  const verb = parts[0].toLowerCase()
-  const v = data?.ventures?.[0]
-  if (!v) { addMsg('Geen actieve venture gevonden.', 'sys'); return }
-
-  if (verb === '/pause' || verb === '/stop') {
-    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { status: 'paused' } })
-    addMsg('✓ Evergreen is gepauzeerd.', 'ai')
-  } else if (verb === '/resume' || verb === '/start') {
-    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { status: 'active' } })
-    addMsg('✓ Evergreen is hervat.', 'ai')
-  } else if (verb === '/status') {
-    await loadStatus()
-    addMsg('Status bijgewerkt.', 'sys')
-  } else if (verb === '/pivot') {
-    const dir = parts.slice(1).join(' ')
-    if (!dir) { addMsg('Gebruik: /pivot [nieuwe richting]', 'sys'); return }
-    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { evolved_intent: dir } })
-    addMsg('✓ Richting bijgewerkt: ' + dir, 'ai')
-    data = null
-    await loadStatus()
-  } else {
-    addMsg('Onbekend commando. Gebruik: /pause · /resume · /status · /pivot [richting]', 'sys')
+async function executeActions(actions) {
+  if (!actions || !actions.length) return []
+  const results = []
+  for (const action of actions) {
+    try {
+      const r = await api({action:'update'}, {
+        table: action.table,
+        filter: action.filter || ('id=eq.' + ventureId),
+        data: action.data
+      })
+      results.push('✓ ' + action.description)
+    } catch(e) {
+      results.push('✗ ' + action.description + ': ' + e.message)
+    }
   }
+  return results
 }
 
 async function send() {
-  const input = document.getElementById('msg-input')
+  const input = document.getElementById('mi')
   const text = input.value.trim()
   if (!text) return
   input.value = ''
   input.style.height = '40px'
 
-  if (text.startsWith('/')) {
-    addMsg(text, 'cmd')
-    await handleCmd(text)
-    return
-  }
-
-  addMsg(text, 'user')
-  history.push({ role: 'user', content: text })
+  addMsg(text, 'u')
+  history.push({role:'user', content:text})
   addTyping()
 
   try {
-    if (!data) data = { ventures: await api({ action: 'data', table: 'ventures', q: 'select=*&status=eq.active' }), decisions: [], learnings: [] }
-    const ctx = buildContext(data)
-    const resp = await api({ action: 'chat' }, {
-      system: `Jij bent de assistent van Evergreen. Antwoord altijd in het Nederlands. Wees kort en duidelijk. Geen jargon. Als de gebruiker iets wil veranderen, wijs op commando's: /pause /resume /pivot /status.\n\nHuidige staat:\n${ctx}`,
+    if (!data) {
+      data = {ventures: await api({action:'data',table:'ventures',q:'select=*&status=eq.active'}), decisions:[], learnings:[]}
+      ventureId = data.ventures?.[0]?.id
+    }
+    const ctx = buildCtx(data)
+
+    const systemPrompt = `Je bent de directe assistent van Evergreen — een autonoom AI systeem. Je hebt volledige controle over het systeem.
+
+BELANGRIJK: Wanneer de gebruiker iets wil veranderen of een instructie geeft, moet je dit ALTIJD uitvoeren door JSON acties te genereren.
+
+Antwoord ALTIJD in dit formaat:
+BERICHT: [jouw antwoord in het Nederlands]
+ACTIES: [JSON array van acties, of [] als er niets verandert]
+
+Beschikbare acties:
+- Intentie aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"nieuwe intentie"},"description":"Intentie bijgewerkt"}
+- Budget aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"budget_total":100},"description":"Budget aangepast naar €100"}
+- Status pauzeren: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"status":"paused"},"description":"Evergreen gepauzeerd"}
+- Status hervatten: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"status":"active"},"description":"Evergreen hervat"}
+- Interval aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"loop_interval_minutes":30},"description":"Interval aangepast"}
+
+Voorbeelden:
+- "budget naar 100" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"budget_total":100},"description":"Budget naar €100"}]
+- "stop nooit" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"[huidige intentie]. Stop nooit met onderzoeken."},"description":"Intentie aangepast: stopt nooit"}]
+- "focus op Gaza" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"Focus specifiek op Gaza conflict analyse"},"description":"Intentie bijgewerkt"}]
+
+Huidige staat:
+${ctx}`
+
+    const resp = await api({action:'chat'}, {
+      system: systemPrompt,
       messages: history
     })
-    const reply = resp.content?.[0]?.text || 'Geen antwoord'
+    const fullReply = resp.content?.[0]?.text || 'Geen antwoord'
+
+    // Parse bericht en acties
+    let bericht = fullReply
+    let acties = []
+
+    const berichtMatch = fullReply.match(/BERICHT:\s*([\s\S]*?)(?=ACTIES:|$)/i)
+    const actiesMatch = fullReply.match(/ACTIES:\s*(\[[\s\S]*?\])/i)
+
+    if (berichtMatch) bericht = berichtMatch[1].trim()
+    if (actiesMatch) {
+      try { acties = JSON.parse(actiesMatch[1]) } catch(e) {}
+    }
+
     removeTyping()
-    addMsg(reply, 'ai')
-    history.push({ role: 'assistant', content: reply })
+    addMsg(bericht, 'a')
+    history.push({role:'assistant', content:fullReply})
     if (history.length > 20) history = history.slice(-20)
-  } catch (e) {
+
+    // Voer acties uit
+    if (acties && acties.length > 0) {
+      const results = await executeActions(acties)
+      addMsg('**Uitgevoerd:**\n' + results.join('\n'), 'a ac')
+      // Herlaad status
+      setTimeout(loadStatus, 1000)
+    }
+
+  } catch(e) {
     removeTyping()
-    addMsg('Fout: ' + e.message, 'ai')
+    addMsg('Fout: ' + e.message, 'a')
   }
 }
 
-document.getElementById('msg-input').addEventListener('input', function () {
+document.getElementById('mi').addEventListener('input', function() {
   this.style.height = '40px'
   this.style.height = Math.min(this.scrollHeight, 100) + 'px'
 })
-document.getElementById('msg-input').addEventListener('keydown', function (e) {
+document.getElementById('mi').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
 })
 
 loadStatus()
-setInterval(loadStatus, 5 * 60 * 1000)
+setInterval(loadStatus, 5*60*1000)
 </script>
 </body>
 </html>
