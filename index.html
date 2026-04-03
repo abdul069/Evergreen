@@ -548,6 +548,9 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:20px"><div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-family:'DM Serif Display',serif;font-size:20px" id="modalTitle"></h2><button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b6b63">×</button></div><div id="modalBody"></div></div></div>
+
 <script>
 const SUPABASE_URL = 'https://cpdlbkbbiwmzmfnqymbr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
@@ -589,90 +592,40 @@ function timeAgo(dateStr) {
   return `${Math.floor(diff/86400)}d`;
 }
 
-async function loadData() {
-  try {
-    // Ventures
-    const ventures = await supabaseQuery('ventures', 'order=created_at.desc');
-    document.getElementById('statVentures').textContent = Array.isArray(ventures) ? ventures.filter(v => v.status === 'active').length : '—';
+let allVentures = [];
 
-    if (Array.isArray(ventures) && ventures.length > 0) {
-      const totalLoops = ventures.reduce((sum, v) => sum + (v.loop_count || 0), 0);
-      document.getElementById('statLoops').textContent = totalLoops;
-
-      document.getElementById('venturesList').innerHTML = ventures.map(v => `
-        <div class="venture-card">
-          <div class="venture-header">
-            <span class="venture-name">${v.name || 'Venture'}</span>
-            <span class="badge badge-${v.status === 'active' ? 'green' : 'amber'}">${v.status || 'actief'}</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((v.loop_count || 0) * 5, 100)}%"></div></div>
-          <div class="venture-meta">
-            <span>Loop #${v.loop_count || 0}</span>
-            <span>${v.phase || 'research'}</span>
-            <span>${v.budget ? `€${v.budget}` : '€0'}</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      document.getElementById('venturesList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen ventures gevonden</div>';
-    }
-
-    // Memories
-    const memories = await supabaseQuery('memories', 'order=created_at.desc&limit=8');
-    document.getElementById('statMemories').textContent = Array.isArray(memories) ? memories.length : '—';
-
-    if (Array.isArray(memories) && memories.length > 0) {
-      document.getElementById('memoriesList').innerHTML = memories.map(m => `
-        <div class="memory-item">
-          <div class="memory-dot"></div>
-          <div class="memory-text">${m.content || m.learning || m.summary || JSON.stringify(m).substring(0, 80)}</div>
-        </div>
-      `).join('');
-    } else {
-      document.getElementById('memoriesList').innerHTML = '<div class="memory-item"><div class="memory-text" style="color:#b0b0a8">Nog geen herinneringen</div></div>';
-    }
-
-    // Actions / logs
-    const actions = await supabaseQuery('actions', 'order=created_at.desc&limit=20');
-    document.getElementById('statActions').textContent = Array.isArray(actions) ? actions.filter(a => {
-      const d = new Date(a.created_at);
-      return d > new Date(Date.now() - 86400000);
-    }).length : '—';
-
-    if (Array.isArray(actions) && actions.length > 0) {
-      document.getElementById('logList').innerHTML = actions.map(a => {
-        const { cls, icon } = getLogIcon(a.type || a.action_type || '');
-        return `
-          <div class="log-item">
-            <div class="log-icon ${cls}">${icon}</div>
-            <div class="log-text">
-              <div class="log-action">${a.type || a.action_type || 'actie'}</div>
-              <div class="log-detail">${a.venture_name || a.venture_id || ''} ${a.success !== undefined ? (a.success ? '✓' : '✗') : ''}</div>
-            </div>
-            <div class="log-time">${a.created_at ? timeAgo(a.created_at) : ''}</div>
-          </div>
-        `;
-      }).join('');
-    } else {
-      document.getElementById('logList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen activiteit</div>';
-    }
-
-    document.getElementById('statusDot').style.background = '#2d6a4f';
-    document.getElementById('statusText').textContent = 'Live';
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('nl-BE');
-
-  } catch (err) {
-    document.getElementById('statusDot').style.background = '#c0392b';
-    document.getElementById('statusText').textContent = 'Fout';
-    console.error(err);
-  }
+function ventureName(v) {
+  return v.name || v.original_intent || v.intent || v.title || ('Venture ' + (v.id || '').substring(0, 6));
 }
 
-async function sendIntent() {
-  const input = document.getElementById('intentInput');
-  const intent = input.value.trim();
-  if (!intent) return;
+function openVenture(id) {
+  const v = allVentures.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('modalTitle').textContent = ventureName(v);
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">Status</div><div style="font-weight:600;margin-top:4px">${v.status || '—'}</div></div>
+      <div class="stat-card"><div class="stat-label">Loop</div><div style="font-weight:600;margin-top:4px">#${v.loop_count || 0}</div></div>
+      <div class="stat-card"><div class="stat-label">Fase</div><div style="font-weight:600;margin-top:4px">${v.phase || '—'}</div></div>
+      <div class="stat-card"><div class="stat-label">Budget</div><div style="font-weight:600;margin-top:4px">€${v.budget || 0}</div></div>
+    </div>
+    ${v.original_intent ? `<div style="background:var(--gray-1);border-radius:8px;padding:14px;font-size:13px;color:var(--gray-4);line-height:1.5"><strong>Intentie:</strong><br>${v.original_intent}</div>` : ''}
+    ${v.last_action ? `<div style="margin-top:12px;font-size:12px;color:var(--gray-3)">Laatste actie: ${v.last_action}</div>` : ''}
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="sendVentureIntent('${id}')">Stuur intentie</button>
+      <button class="btn" onclick="closeModal()">Sluiten</button>
+    </div>
+  `;
+  document.getElementById('modal').style.display = 'flex';
+}
 
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+async function sendVentureIntent(ventureId) {
+  const intent = prompt('Stuur een intentie naar deze venture:');
+  if (!intent) return;
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/memories`, {
       method: 'POST',
@@ -682,41 +635,51 @@ async function sendIntent() {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({ content: `[INTENTIE VAN EIGENAAR] ${intent}`, type: 'owner_intent', importance: 1.0 })
+      body: JSON.stringify({ content: `[EIGENAAR → VENTURE] ${intent}`, venture_id: ventureId, type: 'owner_intent', importance: 1.0 })
     });
-    toast('✓ Intentie verstuurd naar Evergreen');
-    input.value = '';
-    setTimeout(loadData, 1000);
-  } catch (err) {
-    toast('⚠ Fout bij versturen');
-  }
+    toast('✓ Intentie verstuurd');
+    closeModal();
+  } catch { toast('⚠ Fout bij versturen'); }
 }
 
-async function triggerAction(actionType) {
+async function loadData() {
   try {
-    const res = await fetch(`${API_URL}/trigger`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: actionType })
-    });
-    if (res.ok) {
-      toast(`✓ ${actionType} getriggerd`);
+    // Ventures
+    const ventures = await supabaseQuery('ventures', 'order=created_at.desc');
+    allVentures = Array.isArray(ventures) ? ventures : [];
+
+    document.getElementById('statVentures').textContent = allVentures.filter(v => v.status === 'active').length || 0;
+    const totalLoops = allVentures.reduce((sum, v) => sum + (v.loop_count || 0), 0);
+    document.getElementById('statLoops').textContent = totalLoops;
+
+    if (allVentures.length > 0) {
+      document.getElementById('venturesList').innerHTML = allVentures.map(v => `
+        <div class="venture-card" onclick="openVenture('${v.id}')" style="cursor:pointer">
+          <div class="venture-header">
+            <span class="venture-name">${ventureName(v)}</span>
+            <span class="badge badge-${v.status === 'active' ? 'green' : 'amber'}">${(v.status || 'actief').toUpperCase()}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((v.loop_count || 0) * 5, 100)}%"></div></div>
+          <div class="venture-meta">
+            <span>Loop #${v.loop_count || 0}</span>
+            <span>${v.phase || 'research'}</span>
+            <span>€${v.budget || 0}</span>
+            <span style="margin-left:auto;color:#b0b0a8">→ details</span>
+          </div>
+        </div>
+      `).join('');
     } else {
-      toast(`⚠ API niet bereikbaar — actie opgeslagen`);
+      document.getElementById('venturesList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen ventures gevonden</div>';
     }
-  } catch {
-    toast(`⚡ ${actionType} — Evergreen voert dit uit in volgende cyclus`);
-  }
-}
 
-function refresh() {
-  document.getElementById('statusText').textContent = 'Laden...';
-  loadData();
-}
-
-// Auto-refresh elke 30 seconden
-loadData();
-setInterval(loadData, 30000);
-</script>
-</body>
-</html>
+    // Memories - probeer meerdere tabelnamen
+    let memories = [];
+    for (const table of ['memories', 'memory', 'learnings']) {
+      const res = await supabaseQuery(table, 'order=created_at.desc&limit=8');
+      if (Array.isArray(res) && res.length > 0) { memories = res; break; }
+    }
+    document.getElementById('statMemories').textContent = memories.length || 0;
+    document.getElementById('memoriesList').innerHTML = memories.length > 0
+      ? memories.map(m => `
+          <div class="memory-item">
+            <div class="memory-dot"></
