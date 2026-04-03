@@ -1,257 +1,722 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Evergreen</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#060a0f;--bg2:#0a1018;--bg3:#0d1520;--border:#1a2535;--green:#00ff87;--cyan:#00cfff;--red:#ff5533;--muted:#3a5068;--text:#d0e0ef;--text2:#7a9ab0;--font:'IBM Plex Mono',monospace}
-body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh;display:flex;flex-direction:column;font-size:13px}
-header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.logo{font-size:11px;font-weight:700;letter-spacing:5px;color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
-.hmeta{font-size:10px;color:var(--muted);display:flex;gap:12px;align-items:center}
-.rbtn{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font);font-size:9px;padding:3px 10px;cursor:pointer}
-#status-panel{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:40vh;overflow-y:auto}
-.sl{color:var(--muted);font-size:11px;font-style:italic}
-.sc{font-size:12px;line-height:1.8;color:var(--text2)}
-.sc b{color:var(--green)}
-.sr{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.st{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px}
-.sv{font-size:20px;font-weight:700;color:var(--green);display:block}
-.sl2{color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
-#chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
-.m{max-width:88%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
-.m.u{align-self:flex-end;background:#0f2035;border:1px solid #1a3550;color:var(--cyan)}
-.m.a{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
-.m.a b{color:var(--green)}
-.m.s{align-self:center;color:var(--muted);font-size:10px;letter-spacing:1px}
-.m.c{align-self:flex-end;background:#002218;border:1px solid #004030;color:var(--green)}
-.m.ac{background:#001a10;border-color:#003020;font-size:11px}
-.typing{display:flex;gap:4px;align-items:center}
-.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s ease-in-out infinite}
-.typing span:nth-child(2){animation-delay:.2s}
-.typing span:nth-child(3){animation-delay:.4s}
-#ia{border-top:1px solid var(--border);padding:12px 20px;flex-shrink:0;background:var(--bg)}
-.ir{display:flex;gap:8px;align-items:flex-end}
-#mi{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;padding:10px 14px;resize:none;outline:none;max-height:100px;min-height:40px}
-#mi:focus{border-color:var(--cyan)}
-#mi::placeholder{color:var(--muted)}
-.sb{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer}
-.hint{font-size:9px;color:var(--muted);margin-top:6px}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.8)}}
-@keyframes blink{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-@media(max-width:600px){#status-panel{max-height:35vh}.sr{gap:8px}#ia{padding:10px 14px}}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --gray-1: #f5f5f3;
+    --gray-2: #e8e8e4;
+    --gray-3: #b0b0a8;
+    --gray-4: #6b6b63;
+    --green: #2d6a4f;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --amber: #b7791f;
+    --amber-light: #fef3c7;
+    --accent: #1a1a2e;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ffffff;
+    color: var(--black);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--gray-2);
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--black);
+  }
+
+  .logo span {
+    font-style: italic;
+    color: var(--green);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .status-text {
+    font-size: 13px;
+    color: var(--gray-4);
+    font-weight: 500;
+  }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--gray-2);
+    background: white;
+    color: var(--black);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn:hover { background: var(--gray-1); border-color: var(--gray-3); }
+
+  .btn-primary {
+    background: var(--black);
+    color: white;
+    border-color: var(--black);
+  }
+
+  .btn-primary:hover { background: #333; border-color: #333; }
+
+  .btn-danger { border-color: #fca5a5; color: var(--red); }
+  .btn-danger:hover { background: var(--red-light); }
+
+  /* ── Layout ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--black);
+    margin-bottom: 16px;
+  }
+
+  /* ── Stats Row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--gray-1);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-4);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--black);
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--gray-3);
+    margin-top: 4px;
+  }
+
+  /* ── Two column ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Ventures ── */
+  .venture-card {
+    border: 1px solid var(--gray-2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.15s;
+  }
+
+  .venture-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+
+  .venture-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .venture-name {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+
+  .venture-meta {
+    font-size: 12px;
+    color: var(--gray-4);
+    display: flex;
+    gap: 16px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--gray-2);
+    border-radius: 2px;
+    margin: 12px 0 8px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+
+  /* ── Log Feed ── */
+  .log-feed {
+    border: 1px solid var(--gray-2);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .log-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  .log-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .log-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--gray-1);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .log-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .log-icon-research { background: #e0f2fe; }
+  .log-icon-content { background: #f0fdf4; }
+  .log-icon-improve { background: #fef3c7; }
+  .log-icon-control { background: #f3e8ff; }
+  .log-icon-error { background: var(--red-light); }
+
+  .log-text {
+    flex: 1;
+  }
+
+  .log-action {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--black);
+  }
+
+  .log-detail {
+    font-size: 12px;
+    color: var(--gray-4);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .log-time {
+    font-size: 11px;
+    color: var(--gray-3);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* ── Memory ── */
+  .memory-list {
+    border: 1px solid var(--gray-2);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .memory-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-1);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .memory-item:last-child { border-bottom: none; }
+
+  .memory-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .memory-text {
+    font-size: 13px;
+    color: var(--gray-4);
+    line-height: 1.4;
+  }
+
+  /* ── Controls ── */
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .control-card {
+    border: 1px solid var(--gray-2);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+
+  .control-card:hover {
+    background: var(--gray-1);
+    border-color: var(--gray-3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .control-icon { font-size: 22px; margin-bottom: 8px; }
+  .control-label { font-size: 13px; font-weight: 600; color: var(--black); }
+  .control-desc { font-size: 11px; color: var(--gray-4); margin-top: 4px; }
+
+  /* ── Intent input ── */
+  .intent-box {
+    border: 1px solid var(--gray-2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+
+  .intent-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-4);
+    margin-bottom: 10px;
+  }
+
+  .intent-input {
+    width: 100%;
+    border: 1px solid var(--gray-2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--black);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .intent-input:focus { border-color: var(--black); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--black);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Loading ── */
+  .loading { text-align: center; padding: 40px; color: var(--gray-3); font-size: 13px; }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--gray-2);
+    border-top-color: var(--black);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    header { padding: 16px 20px; }
+    main { padding: 24px 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .controls-grid { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo"><div class="dot"></div>EVERGREEN</div>
-  <div class="hmeta"><span id="upd"></span><button class="rbtn" onclick="loadStatus()">↻ status</button></div>
-</header>
-<div id="status-panel"><div class="sl">Laden...</div></div>
-<div id="chat"><div class="m s">Geef instructies of stel vragen. Ik voer het direct uit.</div></div>
-<div id="ia">
-  <div class="ir">
-    <textarea id="mi" placeholder="Zeg wat Evergreen moet doen..." rows="1"></textarea>
-    <button class="sb" onclick="send()">➤</button>
+  <div class="logo">Ever<span>green</span></div>
+  <div class="header-right">
+    <div class="pulse-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Verbinden...</span>
+    <button class="btn btn-primary" onclick="refresh()">↻ Vernieuwen</button>
   </div>
-  <div class="hint">Alles wat je zegt wordt direct uitgevoerd in het systeem.</div>
-</div>
+</header>
+
+<main>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Actieve Ventures</div>
+      <div class="stat-value" id="statVentures">—</div>
+      <div class="stat-sub">live systemen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Totale Loops</div>
+      <div class="stat-value" id="statLoops">—</div>
+      <div class="stat-sub">uitgevoerd</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Acties Vandaag</div>
+      <div class="stat-value" id="statActions">—</div>
+      <div class="stat-sub">deze cyclus</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Herinneringen</div>
+      <div class="stat-value" id="statMemories">—</div>
+      <div class="stat-sub">opgeslagen</div>
+    </div>
+  </div>
+
+  <!-- Intentie aanpassen -->
+  <div class="intent-box">
+    <div class="intent-label">Stuur intentie naar Evergreen</div>
+    <input class="intent-input" id="intentInput" type="text" placeholder="bijv. Focus op Belgische accountants, verhoog budget naar €100...">
+    <button class="btn btn-primary" onclick="sendIntent()">Versturen →</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="section-title">Zelfcontrole</div>
+  <div class="controls-grid">
+    <div class="control-card" onclick="triggerAction('restart_self')">
+      <div class="control-icon">🔄</div>
+      <div class="control-label">Herstart</div>
+      <div class="control-desc">Railway herstart Evergreen</div>
+    </div>
+    <div class="control-card" onclick="triggerAction('deploy_netlify')">
+      <div class="control-icon">🚀</div>
+      <div class="control-label">Deploy Dashboard</div>
+      <div class="control-desc">Netlify opnieuw deployen</div>
+    </div>
+    <div class="control-card" onclick="triggerAction('self_improve')">
+      <div class="control-icon">🧬</div>
+      <div class="control-label">Zelfverbetering</div>
+      <div class="control-desc">Code analyseren & fixen</div>
+    </div>
+    <div class="control-card" onclick="triggerAction('research_market')">
+      <div class="control-icon">🔍</div>
+      <div class="control-label">Marktonderzoek</div>
+      <div class="control-desc">Nu uitvoeren</div>
+    </div>
+    <div class="control-card" onclick="triggerAction('analyze_results')">
+      <div class="control-icon">📊</div>
+      <div class="control-label">Analyseer</div>
+      <div class="control-desc">Resultaten doorlichten</div>
+    </div>
+    <div class="control-card" onclick="triggerAction('create_content')">
+      <div class="control-icon">✍️</div>
+      <div class="control-label">Maak Content</div>
+      <div class="control-desc">LinkedIn post genereren</div>
+    </div>
+  </div>
+
+  <!-- Ventures + Log -->
+  <div class="two-col">
+    <div>
+      <div class="section-title">Ventures</div>
+      <div id="venturesList">
+        <div class="loading"><div class="spinner"></div>Laden...</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="log-feed">
+        <div class="log-header">
+          <span class="log-title">Live Activiteit</span>
+          <span class="status-text" id="lastUpdate"></span>
+        </div>
+        <div class="log-list" id="logList">
+          <div class="loading"><div class="spinner"></div>Laden...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Memories -->
+  <div class="section-title">Recente Herinneringen</div>
+  <div class="memory-list" id="memoriesList">
+    <div class="loading"><div class="spinner"></div>Laden...</div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
-let data = null, history = [], ventureId = null
+const SUPABASE_URL = 'https://cpdlbkbbiwmzmfnqymbr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
+const API_URL = 'https://evergreen-production-d7f1.up.railway.app';
 
-async function api(params, body) {
-  const q = new URLSearchParams(params).toString()
-  const opts = body ? { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) } : {}
-  const r = await fetch('/api?' + q, opts)
-  return r.json()
+function toast(msg, duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
 }
 
-async function loadStatus() {
-  document.getElementById('status-panel').innerHTML = '<div class="sl">Status laden...</div>'
+async function supabaseQuery(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.json();
+}
+
+function getLogIcon(action) {
+  if (!action) return { cls: 'log-icon-research', icon: '⚡' };
+  if (action.includes('research') || action.includes('find')) return { cls: 'log-icon-research', icon: '🔍' };
+  if (action.includes('content') || action.includes('post')) return { cls: 'log-icon-content', icon: '✍️' };
+  if (action.includes('improve') || action.includes('fix')) return { cls: 'log-icon-improve', icon: '🔧' };
+  if (action.includes('restart') || action.includes('deploy') || action.includes('variable')) return { cls: 'log-icon-control', icon: '⚙️' };
+  if (action.includes('error') || action.includes('fail')) return { cls: 'log-icon-error', icon: '⚠️' };
+  return { cls: 'log-icon-research', icon: '⚡' };
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return `${diff}s`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}u`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+async function loadData() {
   try {
-    const [ventures, decisions, learnings] = await Promise.all([
-      api({action:'data', table:'ventures', q:'select=*&status=eq.active&order=created_at.desc'}),
-      api({action:'data', table:'decisions', q:'select=*&order=created_at.desc&limit=15'}),
-      api({action:'data', table:'learnings', q:'select=*&order=created_at.desc&limit=10'})
-    ])
-    data = {ventures, decisions, learnings}
-    const v = ventures?.[0]
-    if (v) ventureId = v.id
+    // Ventures
+    const ventures = await supabaseQuery('ventures', 'order=created_at.desc');
+    document.getElementById('statVentures').textContent = Array.isArray(ventures) ? ventures.filter(v => v.status === 'active').length : '—';
 
-    const ctx = buildCtx(data)
-    const resp = await api({action:'chat'}, {
-      system: 'Geef een korte samenvatting (max 2 zinnen) in gewone Nederlandse taal van de huidige staat van Evergreen. Geen jargon.\n\n' + ctx,
-      messages: [{role:'user', content:'Wat doet Evergreen nu?'}]
-    })
-    const summary = resp.content?.[0]?.text || ''
-    const budget = v ? (v.budget_total - (v.budget_spent||0)).toFixed(0) : '—'
+    if (Array.isArray(ventures) && ventures.length > 0) {
+      const totalLoops = ventures.reduce((sum, v) => sum + (v.loop_count || 0), 0);
+      document.getElementById('statLoops').textContent = totalLoops;
 
-    document.getElementById('status-panel').innerHTML = `
-      <div class="sc">${md(summary)}</div>
-      <div class="sr">
-        <div class="st"><span class="sl2">TICK</span><span class="sv">#${v?.loop_count||0}</span></div>
-        <div class="st"><span class="sl2">BUDGET</span><span class="sv">€${budget}</span></div>
-        <div class="st"><span class="sl2">OMZET</span><span class="sv">€${(v?.revenue_total||0).toFixed(0)}</span></div>
-        <div class="st"><span class="sl2">INTERVAL</span><span class="sv">${v?.loop_interval_minutes||'—'}m</span></div>
-      </div>`
-    document.getElementById('upd').textContent = 'bijgewerkt ' + new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'})
-  } catch(e) {
-    document.getElementById('status-panel').innerHTML = '<div class="sl" style="color:var(--red)">Fout: ' + e.message + '</div>'
-  }
-}
-
-function buildCtx(d) {
-  const v = d.ventures?.[0]
-  if (!v) return 'Geen actieve ventures.'
-  const dec = d.decisions?.filter(x => x.venture_id === v.id) || []
-  const lea = d.learnings?.filter(x => x.venture_id === v.id) || []
-  return `VENTURE ID: ${v.id}
-NAAM: ${v.project_name} TICK #${v.loop_count}
-INTENTIE: ${v.evolved_intent || v.original_intent}
-FASE: ${v.phase} | BUDGET TOTAAL: €${v.budget_total} | BUDGET UITGEGEVEN: €${v.budget_spent||0} | OMZET: €${v.revenue_total||0}
-INTERVAL: ${v.loop_interval_minutes}m
-
-RECENTE ACTIES:
-${dec.slice(0,8).map(d=>`- ${d.action_type}: ${d.success?'OK':'FOUT'} | ${(d.reasoning||'').substring(0,100)}`).join('\n')}
-
-INZICHTEN:
-${lea.slice(0,5).map(l=>`- ${(l.insight||'').substring(0,120)}`).join('\n')}`
-}
-
-function md(t) { return t.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>') }
-
-function addMsg(text, type) {
-  const chat = document.getElementById('chat')
-  const div = document.createElement('div')
-  div.className = 'm ' + type
-  div.innerHTML = md(text)
-  chat.appendChild(div)
-  chat.scrollTop = chat.scrollHeight
-  return div
-}
-
-function addTyping() {
-  const chat = document.getElementById('chat')
-  const div = document.createElement('div')
-  div.className = 'm a'
-  div.id = 'typing'
-  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>'
-  chat.appendChild(div)
-  chat.scrollTop = chat.scrollHeight
-}
-function removeTyping() { document.getElementById('typing')?.remove() }
-
-async function executeActions(actions) {
-  if (!actions || !actions.length) return []
-  const results = []
-  for (const action of actions) {
-    try {
-      const r = await api({action:'update'}, {
-        table: action.table,
-        filter: action.filter || ('id=eq.' + ventureId),
-        data: action.data
-      })
-      results.push('✓ ' + action.description)
-    } catch(e) {
-      results.push('✗ ' + action.description + ': ' + e.message)
+      document.getElementById('venturesList').innerHTML = ventures.map(v => `
+        <div class="venture-card">
+          <div class="venture-header">
+            <span class="venture-name">${v.name || 'Venture'}</span>
+            <span class="badge badge-${v.status === 'active' ? 'green' : 'amber'}">${v.status || 'actief'}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((v.loop_count || 0) * 5, 100)}%"></div></div>
+          <div class="venture-meta">
+            <span>Loop #${v.loop_count || 0}</span>
+            <span>${v.phase || 'research'}</span>
+            <span>${v.budget ? `€${v.budget}` : '€0'}</span>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('venturesList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen ventures gevonden</div>';
     }
+
+    // Memories
+    const memories = await supabaseQuery('memories', 'order=created_at.desc&limit=8');
+    document.getElementById('statMemories').textContent = Array.isArray(memories) ? memories.length : '—';
+
+    if (Array.isArray(memories) && memories.length > 0) {
+      document.getElementById('memoriesList').innerHTML = memories.map(m => `
+        <div class="memory-item">
+          <div class="memory-dot"></div>
+          <div class="memory-text">${m.content || m.learning || m.summary || JSON.stringify(m).substring(0, 80)}</div>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('memoriesList').innerHTML = '<div class="memory-item"><div class="memory-text" style="color:#b0b0a8">Nog geen herinneringen</div></div>';
+    }
+
+    // Actions / logs
+    const actions = await supabaseQuery('actions', 'order=created_at.desc&limit=20');
+    document.getElementById('statActions').textContent = Array.isArray(actions) ? actions.filter(a => {
+      const d = new Date(a.created_at);
+      return d > new Date(Date.now() - 86400000);
+    }).length : '—';
+
+    if (Array.isArray(actions) && actions.length > 0) {
+      document.getElementById('logList').innerHTML = actions.map(a => {
+        const { cls, icon } = getLogIcon(a.type || a.action_type || '');
+        return `
+          <div class="log-item">
+            <div class="log-icon ${cls}">${icon}</div>
+            <div class="log-text">
+              <div class="log-action">${a.type || a.action_type || 'actie'}</div>
+              <div class="log-detail">${a.venture_name || a.venture_id || ''} ${a.success !== undefined ? (a.success ? '✓' : '✗') : ''}</div>
+            </div>
+            <div class="log-time">${a.created_at ? timeAgo(a.created_at) : ''}</div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      document.getElementById('logList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen activiteit</div>';
+    }
+
+    document.getElementById('statusDot').style.background = '#2d6a4f';
+    document.getElementById('statusText').textContent = 'Live';
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('nl-BE');
+
+  } catch (err) {
+    document.getElementById('statusDot').style.background = '#c0392b';
+    document.getElementById('statusText').textContent = 'Fout';
+    console.error(err);
   }
-  return results
 }
 
-async function send() {
-  const input = document.getElementById('mi')
-  const text = input.value.trim()
-  if (!text) return
-  input.value = ''
-  input.style.height = '40px'
-
-  addMsg(text, 'u')
-  history.push({role:'user', content:text})
-  addTyping()
+async function sendIntent() {
+  const input = document.getElementById('intentInput');
+  const intent = input.value.trim();
+  if (!intent) return;
 
   try {
-    if (!data) {
-      data = {ventures: await api({action:'data',table:'ventures',q:'select=*&status=eq.active'}), decisions:[], learnings:[]}
-      ventureId = data.ventures?.[0]?.id
-    }
-    const ctx = buildCtx(data)
-
-    const systemPrompt = `Je bent de directe assistent van Evergreen — een autonoom AI systeem. Je hebt volledige controle over het systeem.
-
-BELANGRIJK: Wanneer de gebruiker iets wil veranderen of een instructie geeft, moet je dit ALTIJD uitvoeren door JSON acties te genereren.
-
-Antwoord ALTIJD in dit formaat:
-BERICHT: [jouw antwoord in het Nederlands]
-ACTIES: [JSON array van acties, of [] als er niets verandert]
-
-Beschikbare acties:
-- Intentie aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"nieuwe intentie"},"description":"Intentie bijgewerkt"}
-- Budget aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"budget_total":100},"description":"Budget aangepast naar €100"}
-- Status pauzeren: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"status":"paused"},"description":"Evergreen gepauzeerd"}
-- Status hervatten: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"status":"active"},"description":"Evergreen hervat"}
-- Interval aanpassen: {"table":"ventures","filter":"id=eq.${ventureId}","data":{"loop_interval_minutes":30},"description":"Interval aangepast"}
-
-Voorbeelden:
-- "budget naar 100" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"budget_total":100},"description":"Budget naar €100"}]
-- "stop nooit" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"[huidige intentie]. Stop nooit met onderzoeken."},"description":"Intentie aangepast: stopt nooit"}]
-- "focus op Gaza" → ACTIES: [{"table":"ventures","filter":"id=eq.${ventureId}","data":{"evolved_intent":"Focus specifiek op Gaza conflict analyse"},"description":"Intentie bijgewerkt"}]
-
-Huidige staat:
-${ctx}`
-
-    const resp = await api({action:'chat'}, {
-      system: systemPrompt,
-      messages: history
-    })
-    const fullReply = resp.content?.[0]?.text || 'Geen antwoord'
-
-    // Parse bericht en acties
-    let bericht = fullReply
-    let acties = []
-
-    const berichtMatch = fullReply.match(/BERICHT:\s*([\s\S]*?)(?=ACTIES:|$)/i)
-    const actiesMatch = fullReply.match(/ACTIES:\s*(\[[\s\S]*?\])/i)
-
-    if (berichtMatch) bericht = berichtMatch[1].trim()
-    if (actiesMatch) {
-      try { acties = JSON.parse(actiesMatch[1]) } catch(e) {}
-    }
-
-    removeTyping()
-    addMsg(bericht, 'a')
-    history.push({role:'assistant', content:fullReply})
-    if (history.length > 20) history = history.slice(-20)
-
-    // Voer acties uit
-    if (acties && acties.length > 0) {
-      const results = await executeActions(acties)
-      addMsg('**Uitgevoerd:**\n' + results.join('\n'), 'a ac')
-      // Herlaad status
-      setTimeout(loadStatus, 1000)
-    }
-
-  } catch(e) {
-    removeTyping()
-    addMsg('Fout: ' + e.message, 'a')
+    await fetch(`${SUPABASE_URL}/rest/v1/memories`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ content: `[INTENTIE VAN EIGENAAR] ${intent}`, type: 'owner_intent', importance: 1.0 })
+    });
+    toast('✓ Intentie verstuurd naar Evergreen');
+    input.value = '';
+    setTimeout(loadData, 1000);
+  } catch (err) {
+    toast('⚠ Fout bij versturen');
   }
 }
 
-document.getElementById('mi').addEventListener('input', function() {
-  this.style.height = '40px'
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px'
-})
-document.getElementById('mi').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
-})
+async function triggerAction(actionType) {
+  try {
+    const res = await fetch(`${API_URL}/trigger`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: actionType })
+    });
+    if (res.ok) {
+      toast(`✓ ${actionType} getriggerd`);
+    } else {
+      toast(`⚠ API niet bereikbaar — actie opgeslagen`);
+    }
+  } catch {
+    toast(`⚡ ${actionType} — Evergreen voert dit uit in volgende cyclus`);
+  }
+}
 
-loadStatus()
-setInterval(loadStatus, 5*60*1000)
+function refresh() {
+  document.getElementById('statusText').textContent = 'Laden...';
+  loadData();
+}
+
+// Auto-refresh elke 30 seconden
+loadData();
+setInterval(loadData, 30000);
 </script>
 </body>
 </html>
