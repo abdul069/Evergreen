@@ -14,28 +14,73 @@ const logger = winston.createLogger({
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 function parseJSON(text: string): any {
-  // Verwijder code blocks
-  let clean = text.replace(/```json|```/g, '').trim()
-  // Verwijder control characters die JSON breken
+  // 1. Strip markdown fences
+  let clean = text.replace(/^```(?:json|typescript|ts)?\s*/gim, '').replace(/```\s*$/gim, '').trim()
+
+  // 2. Verwijder control characters (behoud newline/tab als spatie)
   clean = clean.replace(/[\x00-\x1F\x7F]/g, function(c) {
-    // Behoud newlines en tabs
     if (c === '\n' || c === '\r' || c === '\t') return ' '
     return ''
   })
-  // Extraheer JSON object
-  const match = clean.match(/\{[\s\S]*\}/)
-  if (match) {
-    try {
-      return JSON.parse(match[0])
-    } catch (e) {
-      // Probeer te repareren door quotes te escapen
-      const repaired = match[0].replace(/(?<!\\)"/g, function(q, offset, str) {
-        return q
-      })
-      return JSON.parse(repaired)
+
+  // 3. Verwijder trailing commas voor ] of }
+  clean = clean.replace(/,\s*([\]}])/g, '$1')
+
+  // 4. Probeer direct parsen
+  try { return JSON.parse(clean) } catch (_) {}
+
+  // 5. Extraheer eerste { ... } blok
+  const objMatch = clean.match(/\{[\s\S]*\}/)
+  if (objMatch) {
+    let candidate = objMatch[0].replace(/,\s*([\]}])/g, '$1')
+
+    // 5a. Probeer het blok direct
+    try { return JSON.parse(candidate) } catch (_) {}
+
+    // 5b. Afgekapte JSON: sluit open arrays en objecten
+    candidate = closeOpenJSON(candidate)
+    try { return JSON.parse(candidate) } catch (_) {}
+
+    // 5c. Kap af bij laatste geldig sluitend teken
+    const lastBrace = candidate.lastIndexOf('}')
+    if (lastBrace > 0) {
+      try { return JSON.parse(candidate.substring(0, lastBrace + 1)) } catch (_) {}
     }
   }
-  return JSON.parse(clean)
+
+  // 6. Laatste poging: de hele tekst afsluiten
+  const closed = closeOpenJSON(clean)
+  try { return JSON.parse(closed) } catch (e: any) {
+    throw new Error('parseJSON mislukt: ' + e.message + ' | input: ' + clean.substring(0, 120))
+  }
+}
+
+/**
+ * Sluit open JSON-structuren door ontbrekende ] en } toe te voegen.
+ * Werkt voor afgekapte Claude-output.
+ */
+function closeOpenJSON(text: string): string {
+  const stack: string[] = []
+  let inString = false
+  let escape = false
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (escape) { escape = false; continue }
+    if (ch === '\\' && inString) { escape = true; continue }
+    if (ch === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (ch === '{') stack.push('}')
+    else if (ch === '[') stack.push(']')
+    else if (ch === '}' || ch === ']') stack.pop()
+  }
+
+  // Verwijder eventuele trailing komma voor de sluitende tekens
+  let result = text.replace(/,\s*$/, '')
+  while (stack.length > 0) {
+    result += stack.pop()
+  }
+  return result
 }
 
 export class ThinkEngine {
@@ -74,7 +119,7 @@ export class ThinkEngine {
 
       return {
         reasoning: String(result.reasoning || ''),
-        actions: result.actions || [],
+        actions: Array.isArray(result.actions) ? result.actions : [],
         nextCycleMinutes: Number(result.nextCycleMinutes) || 120,
         strategyInsight: result.strategyInsight ? String(result.strategyInsight) : undefined,
         shouldEvolveIntent: result.shouldEvolveIntent === true,
@@ -116,7 +161,7 @@ export class ThinkEngine {
 
       return {
         reasoning: String(result.reasoning || ''),
-        actions: result.actions || [],
+        actions: Array.isArray(result.actions) ? result.actions : [],
         nextCycleMinutes: Number(result.nextCycleMinutes) || 60
       }
     } catch (err: any) {
@@ -157,7 +202,7 @@ export class ThinkEngine {
 
       return {
         reasoning: String(result.reasoning || ''),
-        steps: (result.steps || []).map(String),
+        steps: Array.isArray(result.steps) ? result.steps.map(String) : ['Actie uitvoeren'],
         content: result.content ? String(result.content) : undefined
       }
     } catch (err: any) {
@@ -203,9 +248,9 @@ export class ThinkEngine {
       const result = parseJSON(text)
 
       return {
-        strengths: (result.strengths || []).map(String),
-        weaknesses: (result.weaknesses || []).map(String),
-        blindSpots: (result.blindSpots || []).map(String),
+        strengths: Array.isArray(result.strengths) ? result.strengths.map(String) : [],
+        weaknesses: Array.isArray(result.weaknesses) ? result.weaknesses.map(String) : [],
+        blindSpots: Array.isArray(result.blindSpots) ? result.blindSpots.map(String) : [],
         recommendation: String(result.recommendation || ''),
         shouldChangeStrategy: result.shouldChangeStrategy === true
       }
