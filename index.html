@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evergreen — Live Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #060a0f; --bg2: #0a1018; --bg3: #0d1520;
+      --border: #1a2535; --border2: #0f1e30;
+      --green: #00ff87; --cyan: #00cfff; --red: #ff5533;
+      --muted: #3a5068; --muted2: #2a4060;
+      --text: #d0e0ef; --text2: #7a9ab0;
+      --font: 'IBM Plex Mono', monospace;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; font-size: 13px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1a3550; border-radius: 2px; }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 12px; font-weight: 700; letter-spacing: 5px; color: var(--green); text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+    .header-meta { display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--muted); }
+    .refresh-btn { background: transparent; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: var(--font); font-size: 10px; padding: 4px 12px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
+    .refresh-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    #main { padding: 20px 24px; max-width: 920px; margin: 0 auto; }
+
+    .venture-header { background: var(--bg3); border: 1px solid #003520; border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+    .venture-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px; }
+    .venture-name { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .tick-badge { font-size: 10px; color: var(--muted); letter-spacing: 2px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 3px; }
+    .venture-intent { font-size: 11px; color: #3a7060; line-height: 1.6; max-width: 520px; }
+    .next-loop { text-align: right; flex-shrink: 0; }
+    .next-loop-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 4px; }
+    .next-loop-time { font-size: 14px; font-weight: 700; color: var(--cyan); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .stat-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; padding: 14px 16px; }
+    .stat-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--green); }
+    .stat-sub { font-size: 10px; color: var(--muted2); margin-top: 4px; }
+
+    .section { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+    .section-label { font-size: 9px; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border2); }
+
+    .decision-row { padding: 10px 0; border-bottom: 1px solid var(--border2); display: flex; gap: 12px; align-items: flex-start; }
+    .decision-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .action-badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; background: #0f2035; color: var(--cyan); border: 1px solid #1a3550; white-space: nowrap; letter-spacing: 1px; flex-shrink: 0; }
+    .success-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+    .ok { background: #002218; color: var(--green); border: 1px solid #004030; }
+    .fail { background: #2a0a00; color: var(--red); border: 1px solid #5a1a00; }
+    .decision-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 5px; flex-wrap: wrap; }
+    .decision-time { font-size: 10px; color: var(--muted2); }
+    .decision-reasoning { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+    .learning-item { padding: 9px 0; border-bottom: 1px solid var(--border2); font-size: 11px; color: #6a8aa0; line-height: 1.6; display: flex; gap: 8px; }
+    .learning-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .learning-arrow { color: var(--muted2); flex-shrink: 0; }
+
+    .reasoning-box { border-left: 2px solid var(--green); padding-left: 14px; margin: 10px 0; font-size: 12px; color: var(--text2); line-height: 1.7; }
+
+    .error-box { background: #1a0800; border: 1px solid #5a1a00; border-radius: 6px; padding: 12px 16px; color: var(--red); font-size: 11px; margin-bottom: 14px; }
+    .empty-state { text-align: center; color: var(--muted); padding: 40px; font-size: 11px; letter-spacing: 2px; }
+
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(1.8)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.3s ease forwards; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      header { padding: 12px 16px; }
+      #main { padding: 14px 16px; }
+      .venture-top { flex-direction: column; }
+      .next-loop { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-dot"></div>EVERGREEN</div>
+  <div class="header-meta">
+    <span id="last-refresh"></span>
+    <span id="countdown-text"></span>
+    <button class="refresh-btn" onclick="loadData()">↻ nu</button>
+  </div>
+</header>
+
+<div id="main">
+  <div id="error-box" class="error-box" style="display:none"></div>
+  <div id="content"><div class="empty-state">laden...</div></div>
+</div>
+
+<script>
+  const REFRESH = 30;
+  let countdown = REFRESH;
+  let countdownTimer;
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return '—';
+    const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+    if (diff < 60) return `${diff}s geleden`;
+    if (diff < 3600) return `${Math.floor(diff/60)}m geleden`;
+    return `${Math.floor(diff/3600)}u geleden`;
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('nl-BE', {hour:'2-digit',minute:'2-digit'});
+  }
+
+  async function fetchData(table, q) {
+    const params = new URLSearchParams({ table, q });
+    const res = await fetch(`/api/data?${params}`);
+    if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+    return res.json();
+  }
+
+  async function loadData() {
+    const errBox = document.getElementById('error-box');
+    errBox.style.display = 'none';
+    try {
+      const [ventures, decisions, learnings] = await Promise.all([
+        fetchData('ventures', 'select=*&status=eq.active&order=created_at.desc'),
+        fetchData('decisions', 'select=*&order=created_at.desc&limit=10'),
+        fetchData('learnings', 'select=*&order=created_at.desc&limit=6'),
+      ]);
+
+      render(ventures, decisions, learnings);
+
+      document.getElementById('last-refresh').textContent =
+        'bijgewerkt ' + new Date().toLocaleTimeString('nl-BE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+      countdown = REFRESH;
+    } catch(e) {
+      errBox.textContent = '⚠ ' + e.message;
+      errBox.style.display = 'block';
+    }
+  }
+
+  function render(ventures, decisions, learnings) {
+    const content = document.getElementById('content');
+    if (!ventures || ventures.length === 0) {
+      content.innerHTML = '<div class="empty-state">Geen actieve ventures gevonden</div>';
+      return;
+    }
+
+    content.innerHTML = ventures.map(v => {
+      const budget = (v.budget_total - (v.budget_spent||0)).toFixed(0);
+      const vDec = decisions.filter(d => d.venture_id === v.id).slice(0,8);
+      const vLearn = learnings.filter(l => l.venture_id === v.id).slice(0,5);
+      const intent = (v.evolved_intent || v.original_intent || '').substring(0, 130);
+      const latestReason = vDec.find(d => d.reasoning && d.reasoning !== 'Geen redenering opgegeven');
+
+      return `
+        <div class="venture-header fade-in">
+          <div class="venture-top">
+            <div>
+              <div class="venture-name">
+                <span style="color:var(--green);font-size:8px">●</span>
+                ${esc(v.project_name||'Venture')}
+                <span class="tick-badge">TICK #${v.loop_count}</span>
+              </div>
+              <div class="venture-intent">${esc(intent)}${intent.length>=130?'...':''}</div>
+            </div>
+            <div class="next-loop">
+              <div class="next-loop-label">VOLGENDE LOOP</div>
+              <div class="next-loop-time">${fmtTime(v.next_loop_at)}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">${esc(v.phase)} fase</div>
+            </div>
+          </div>
+          ${latestReason ? `<div class="reasoning-box">${esc(latestReason.reasoning.substring(0,200))}${latestReason.reasoning.length>200?'...':''}</div>` : ''}
+          <div class="stats-grid">
+            ${[
+              ['Budget', `€${budget}`, `van €${v.budget_total}`],
+              ['Omzet', `€${(v.revenue_total||0).toFixed(0)}`, 'totaal'],
+              ['Loops', v.loop_count, `interval: ${v.loop_interval_minutes||'—'}m`],
+              ['Contacten', v.contacts_discovered||0, `${v.contacts_converted||0} conversies`],
+            ].map(([label,val,sub]) => `
+              <div class="stat-card">
+                <div class="stat-label">${label}</div>
+                <div class="stat-value">${val}</div>
+                <div class="stat-sub">${sub}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        ${vDec.length ? `
+          <div class="section fade-in">
+            <div class="section-label">Recente acties</div>
+            ${vDec.map(d => `
+              <div class="decision-row">
+                <div style="flex:1">
+                  <div class="decision-meta">
+                    <span class="action-badge">${esc(d.action_type)}</span>
+                    ${d.executed!==undefined ? `<span class="success-badge ${d.success?'ok':'fail'}">${d.success?'✓ succes':'✗ fout'}</span>` : ''}
+                    <span class="decision-time">${timeAgo(d.created_at)}</span>
+                  </div>
+                  ${d.reasoning && d.reasoning!=='Geen redenering opgegeven' ? `<div class="decision-reasoning">${esc(d.reasoning.substring(0,160))}${d.reasoning.length>160?'...':''}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${vLearn.length ? `
+          <div class="section fade-in">
+            <div class="section-label">Laatste inzichten</div>
+            ${vLearn.map(l => `
+              <div class="learning-item">
+                <span class="learning-arrow">›</span>
+                <span>${esc((l.insight||'').substring(0,180))}${(l.insight||'').length>180?'...':''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      `;
+    }).join('');
+  }
+
+  // Countdown
+  countdownTimer = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown-text').textContent = `refresh in ${countdown}s`;
+    if (countdown <= 0) { countdown = REFRESH; loadData(); }
+  }, 1000);
+
+  loadData();
+</script>
+</body>
+</html>
