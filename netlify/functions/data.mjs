@@ -3,9 +3,11 @@ export default async (req) => {
   const SB_KEY = process.env.SUPABASE_KEY
 
   if (!SB_URL || !SB_KEY) {
-    return new Response(JSON.stringify({ error: "env vars ontbreken" }), {
-      status: 500, headers: { "Content-Type": "application/json" }
-    })
+    return new Response(JSON.stringify({ 
+      error: "env vars ontbreken",
+      has_url: !!SB_URL,
+      has_key: !!SB_KEY
+    }), { status: 500, headers: { "Content-Type": "application/json" } })
   }
 
   const url = new URL(req.url)
@@ -18,13 +20,15 @@ export default async (req) => {
     const res = await fetch(`${SB_URL}/rest/v1/${table}?${q}`, {
       headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
     })
-    const data = await res.json()
-    return new Response(JSON.stringify(data), {
+    const text = await res.text()
+    return new Response(text, {
       status: res.status,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: err.message }), { 
+      status: 500, headers: { "Content-Type": "application/json" }
+    })
   }
 }
 
