@@ -30,8 +30,7 @@ export class EvergreenLoop {
         await this.tick(ventureId)
       } catch (err) {
         logger.error(`Loop error voor venture ${ventureId}`, err)
-        // Nooit stoppen bij een fout. Wacht en probeer opnieuw.
-        await this.sleep(5 * 60 * 1000) // 5 min wachten bij fout
+        await this.sleep(5 * 60 * 1000)
       }
     }
   }
@@ -106,8 +105,8 @@ export class EvergreenLoop {
       await this.handleIntentEvolution(venture, thinkResult.evolvedIntent)
     }
 
-    // 7. Zelfevaluatie (wekelijks)
-    if (venture.loop_count > 0 && venture.loop_count % 168 === 0) { // elke ~7 dagen bij 1u cycles
+    // 7. Zelfevaluatie — elke 12 cycli (sneller dan voorheen voor nieuwe venture)
+    if (venture.loop_count > 0 && venture.loop_count % 12 === 0) {
       await this.runSelfEvaluation(state)
     }
 
@@ -140,7 +139,6 @@ export class EvergreenLoop {
         return
       }
 
-      // Goedkeuring vereist?
       if (action.requiresApproval || action.estimatedCost > state.venture.approval_threshold) {
         const approved = await this.requestApproval(state.venture, action)
         if (!approved) {
@@ -156,7 +154,7 @@ export class EvergreenLoop {
       level: 'operational',
       context_summary: `Uitvoering: ${action.type}`,
       context_full: { action, metrics: state.currentMetrics },
-      reasoning: action.reasoning,
+      reasoning: action.reasoning || 'Geen redenering opgegeven',
       action_type: action.type,
       action_params: action.params,
       executed: false,
@@ -210,19 +208,16 @@ export class EvergreenLoop {
   // Goedkeuring vragen aan eigenaar
   // ============================================
   private static async requestApproval(venture: Venture, action: PlannedAction): Promise<boolean> {
-    // Check of er al een pending approval is voor deze actie
     const pending = await Memory.getPendingApprovals(venture.id)
     const existing = pending.find(p => p.approval_action?.type === action.type)
 
     if (existing) {
-      // Check of eigenaar al geantwoord heeft
       const updated = await Memory.cacheGet<{ response: string }>(`approval_${existing.id}`)
       if (updated?.response === 'approved') return true
       if (updated?.response === 'rejected') return false
-      return false // Nog wachten
+      return false
     }
 
-    // Stuur nieuw goedkeuringsverzoek
     await NotificationService.sendApprovalRequest(
       venture,
       action.estimatedCost || 0,
@@ -231,14 +226,14 @@ export class EvergreenLoop {
       action
     )
 
-    return false // Wacht op antwoord
+    return false
   }
 
   // ============================================
   // Intentie evolutie
   // ============================================
   private static async handleIntentEvolution(venture: Venture, newIntent: string): Promise<void> {
-    logger.info(`🔄 Intentie evolutie voorgesteld`)
+    logger.info(`🔄 Intentie evolutie: ${newIntent.substring(0, 100)}`)
 
     await NotificationService.sendStrategyChange(
       venture,
@@ -247,8 +242,6 @@ export class EvergreenLoop {
       newIntent
     )
 
-    // Wacht 24u — in productie zou dit via een scheduled check gaan
-    // Voor nu: update intentie na melding
     await Memory.updateVenture(venture.id, {
       evolved_intent: newIntent,
       intent_version: venture.intent_version + 1
@@ -259,13 +252,13 @@ export class EvergreenLoop {
   // Zelfevaluatie
   // ============================================
   private static async runSelfEvaluation(state: LoopState): Promise<void> {
-    logger.info(`🔍 Wekelijkse zelfevaluatie`)
+    logger.info(`🔍 Zelfevaluatie`)
 
     const evaluation = await ThinkEngine.selfEvaluate(state)
 
     await NotificationService.sendInfo(
       state.venture,
-      'Wekelijkse zelfevaluatie',
+      'Zelfevaluatie',
       `
 Sterke punten:
 ${evaluation.strengths.map(s => `• ${s}`).join('\n')}
@@ -291,23 +284,25 @@ ${evaluation.recommendation}
   }
 
   // ============================================
-  // Bepaal denkniveau op basis van loop count
+  // Bepaal denkniveau
+  // Nieuwe venture: vaker strategisch in het begin
   // ============================================
   private static determineThinkLevel(venture: Venture): 'strategic' | 'tactical' {
-    // Eerste loop altijd strategisch
     if (venture.loop_count === 0) return 'strategic'
-    // Elke 24 cycli strategisch (bij 1u cycles = dagelijks)
-    if (venture.loop_count % 24 === 0) return 'strategic'
+    // Eerste 5 loops: elke 2 cycli strategisch (snel richting bepalen)
+    if (venture.loop_count < 10 && venture.loop_count % 2 === 0) return 'strategic'
+    // Daarna: elke 8 cycli strategisch
+    if (venture.loop_count % 8 === 0) return 'strategic'
     return 'tactical'
   }
 
-  // Sorteer acties op prioriteit
   private static sortByPriority(actions: PlannedAction[]): PlannedAction[] {
-    const order = { critical: 0, high: 1, medium: 2, low: 3 }
-    return [...actions].sort((a, b) => order[a.priority] - order[b.priority])
+    const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+    return [...actions].sort((a, b) => (order[a.priority] ?? 2) - (order[b.priority] ?? 2))
   }
 
   private static sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 }
+
