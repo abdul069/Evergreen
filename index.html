@@ -6,435 +6,87 @@
 <title>Evergreen</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --black: #0a0a0a;
-    --gray-1: #f5f5f3;
-    --gray-2: #e8e8e4;
-    --gray-3: #b0b0a8;
-    --gray-4: #6b6b63;
-    --green: #2d6a4f;
-    --green-light: #e8f5ee;
-    --red: #c0392b;
-    --red-light: #fdecea;
-    --amber: #b7791f;
-    --amber-light: #fef3c7;
-    --accent: #1a1a2e;
-  }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #ffffff;
-    color: var(--black);
-    min-height: 100vh;
-  }
-
-  /* ── Header ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 40px;
-    border-bottom: 1px solid var(--gray-2);
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    letter-spacing: -0.5px;
-    color: var(--black);
-  }
-
-  .logo span {
-    font-style: italic;
-    color: var(--green);
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.3); }
-  }
-
-  .status-text {
-    font-size: 13px;
-    color: var(--gray-4);
-    font-weight: 500;
-  }
-
-  .btn {
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1.5px solid var(--gray-2);
-    background: white;
-    color: var(--black);
-    transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .btn:hover { background: var(--gray-1); border-color: var(--gray-3); }
-
-  .btn-primary {
-    background: var(--black);
-    color: white;
-    border-color: var(--black);
-  }
-
-  .btn-primary:hover { background: #333; border-color: #333; }
-
-  .btn-danger { border-color: #fca5a5; color: var(--red); }
-  .btn-danger:hover { background: var(--red-light); }
-
-  /* ── Layout ── */
-  main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 24px;
-  }
-
-  .section-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    color: var(--black);
-    margin-bottom: 16px;
-  }
-
-  /* ── Stats Row ── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 40px;
-  }
-
-  .stat-card {
-    background: var(--gray-1);
-    border-radius: 12px;
-    padding: 20px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-4);
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    color: var(--black);
-    line-height: 1;
-  }
-
-  .stat-sub {
-    font-size: 12px;
-    color: var(--gray-3);
-    margin-top: 4px;
-  }
-
-  /* ── Two column ── */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-bottom: 40px;
-  }
-
-  /* ── Ventures ── */
-  .venture-card {
-    border: 1px solid var(--gray-2);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 12px;
-    transition: box-shadow 0.15s;
-  }
-
-  .venture-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-
-  .venture-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .venture-name {
-    font-weight: 600;
-    font-size: 15px;
-  }
-
-  .badge {
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-green { background: var(--green-light); color: var(--green); }
-  .badge-amber { background: var(--amber-light); color: var(--amber); }
-  .badge-red { background: var(--red-light); color: var(--red); }
-
-  .venture-meta {
-    font-size: 12px;
-    color: var(--gray-4);
-    display: flex;
-    gap: 16px;
-  }
-
-  .progress-bar {
-    height: 3px;
-    background: var(--gray-2);
-    border-radius: 2px;
-    margin: 12px 0 8px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--green);
-    border-radius: 2px;
-    transition: width 0.5s;
-  }
-
-  /* ── Log Feed ── */
-  .log-feed {
-    border: 1px solid var(--gray-2);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .log-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--gray-2);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .log-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--black);
-  }
-
-  .log-list {
-    max-height: 320px;
-    overflow-y: auto;
-  }
-
-  .log-item {
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--gray-1);
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    animation: slideIn 0.3s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .log-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .log-icon-research { background: #e0f2fe; }
-  .log-icon-content { background: #f0fdf4; }
-  .log-icon-improve { background: #fef3c7; }
-  .log-icon-control { background: #f3e8ff; }
-  .log-icon-error { background: var(--red-light); }
-
-  .log-text {
-    flex: 1;
-  }
-
-  .log-action {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--black);
-  }
-
-  .log-detail {
-    font-size: 12px;
-    color: var(--gray-4);
-    margin-top: 2px;
-    line-height: 1.4;
-  }
-
-  .log-time {
-    font-size: 11px;
-    color: var(--gray-3);
-    flex-shrink: 0;
-    margin-top: 3px;
-  }
-
-  /* ── Memory ── */
-  .memory-list {
-    border: 1px solid var(--gray-2);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .memory-item {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--gray-1);
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .memory-item:last-child { border-bottom: none; }
-
-  .memory-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    flex-shrink: 0;
-  }
-
-  .memory-text {
-    font-size: 13px;
-    color: var(--gray-4);
-    line-height: 1.4;
-  }
-
-  /* ── Controls ── */
-  .controls-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 40px;
-  }
-
-  .control-card {
-    border: 1px solid var(--gray-2);
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: white;
-  }
-
-  .control-card:hover {
-    background: var(--gray-1);
-    border-color: var(--gray-3);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-
-  .control-icon { font-size: 22px; margin-bottom: 8px; }
-  .control-label { font-size: 13px; font-weight: 600; color: var(--black); }
-  .control-desc { font-size: 11px; color: var(--gray-4); margin-top: 4px; }
-
-  /* ── Intent input ── */
-  .intent-box {
-    border: 1px solid var(--gray-2);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 40px;
-  }
-
-  .intent-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-4);
-    margin-bottom: 10px;
-  }
-
-  .intent-input {
-    width: 100%;
-    border: 1px solid var(--gray-2);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--black);
-    outline: none;
-    transition: border-color 0.15s;
-    margin-bottom: 10px;
-  }
-
-  .intent-input:focus { border-color: var(--black); }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--black);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s;
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* ── Loading ── */
-  .loading { text-align: center; padding: 40px; color: var(--gray-3); font-size: 13px; }
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--gray-2);
-    border-top-color: var(--black);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 10px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 768px) {
-    header { padding: 16px 20px; }
-    main { padding: 24px 16px; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .two-col { grid-template-columns: 1fr; }
-    .controls-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #0a0a0a; --gray-1: #f5f5f3; --gray-2: #e8e8e4; --gray-3: #b0b0a8;
+  --gray-4: #6b6b63; --green: #2d6a4f; --green-light: #e8f5ee;
+  --amber-light: #fef3c7; --amber: #b7791f; --red: #c0392b; --red-light: #fdecea;
+}
+body { font-family: 'DM Sans', sans-serif; background: #fff; color: var(--black); min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--gray-2); position: sticky; top: 0; background: white; z-index: 100; }
+.logo { font-family: 'DM Serif Display', serif; font-size: 22px; }
+.logo span { font-style: italic; color: var(--green); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-3); }
+.pulse.live { background: var(--green); animation: pulse 2s infinite; }
+.pulse.error { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.status-text { font-size: 13px; color: var(--gray-4); font-weight: 500; }
+.btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--gray-2); background: white; color: var(--black); font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.btn:hover { background: var(--gray-1); }
+.btn-primary { background: var(--black); color: white; border-color: var(--black); }
+.btn-primary:hover { background: #333; }
+main { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+.section-title { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 14px; margin-top: 28px; }
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.stat-card { background: var(--gray-1); border-radius: 12px; padding: 16px; }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--gray-4); font-weight: 600; margin-bottom: 6px; }
+.stat-value { font-family: 'DM Serif Display', serif; font-size: 28px; line-height: 1; }
+.stat-sub { font-size: 11px; color: var(--gray-3); margin-top: 3px; }
+.intent-box { border: 1px solid var(--gray-2); border-radius: 12px; padding: 18px; margin-top: 20px; }
+.intent-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--gray-4); margin-bottom: 10px; }
+.intent-input { width: 100%; border: 1px solid var(--gray-2); border-radius: 8px; padding: 11px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 10px; }
+.intent-input:focus { border-color: var(--black); }
+.controls-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.control-card { border: 1px solid var(--gray-2); border-radius: 12px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all .15s; background: white; }
+.control-card:hover { background: var(--gray-1); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.05); }
+.control-icon { font-size: 20px; margin-bottom: 6px; }
+.control-label { font-size: 12px; font-weight: 600; }
+.control-desc { font-size: 11px; color: var(--gray-4); margin-top: 3px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.venture-card { border: 1px solid var(--gray-2); border-radius: 12px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: all .15s; }
+.venture-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.07); border-color: var(--gray-3); }
+.venture-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+.venture-name { font-weight: 600; font-size: 13px; flex: 1; line-height: 1.3; }
+.badge { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.progress-bar { height: 3px; background: var(--gray-2); border-radius: 2px; margin: 8px 0; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 2px; }
+.venture-meta { font-size: 11px; color: var(--gray-4); display: flex; gap: 10px; }
+.log-feed { border: 1px solid var(--gray-2); border-radius: 12px; overflow: hidden; }
+.log-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-2); display: flex; justify-content: space-between; align-items: center; }
+.log-title { font-size: 13px; font-weight: 600; }
+.log-list { max-height: 320px; overflow-y: auto; }
+.log-item { padding: 10px 16px; border-bottom: 1px solid var(--gray-1); display: flex; gap: 10px; align-items: flex-start; }
+.log-icon { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.li-r{background:#e0f2fe} .li-c{background:#f0fdf4} .li-i{background:#fef3c7} .li-k{background:#f3e8ff} .li-e{background:var(--red-light)}
+.log-action { font-size: 12px; font-weight: 500; }
+.log-detail { font-size: 11px; color: var(--gray-4); margin-top: 1px; }
+.log-time { font-size: 11px; color: var(--gray-3); flex-shrink: 0; margin-top: 2px; }
+.memory-list { border: 1px solid var(--gray-2); border-radius: 12px; overflow: hidden; }
+.memory-item { padding: 12px 18px; border-bottom: 1px solid var(--gray-1); display: flex; gap: 10px; align-items: flex-start; }
+.memory-item:last-child { border-bottom: none; }
+.memory-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 5px; }
+.memory-text { font-size: 13px; color: var(--gray-4); line-height: 1.4; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: white; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 18px; flex: 1; margin-right: 12px; line-height: 1.3; }
+.modal-close { background: var(--gray-1); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; cursor: pointer; }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.modal-field { background: var(--gray-1); border-radius: 8px; padding: 12px; }
+.mf-label { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--gray-4); font-weight: 600; margin-bottom: 4px; }
+.mf-value { font-size: 15px; font-weight: 600; }
+.intent-block { background: var(--gray-1); border-radius: 8px; padding: 12px; font-size: 13px; color: var(--gray-4); line-height: 1.5; margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--black); color: white; padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty { text-align: center; padding: 28px; font-size: 13px; color: var(--gray-3); }
+.spin { width: 18px; height: 18px; border: 2px solid var(--gray-2); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; margin: 28px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.controls-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -442,244 +94,209 @@
 <header>
   <div class="logo">Ever<span>green</span></div>
   <div class="header-right">
-    <div class="pulse-dot" id="statusDot"></div>
-    <span class="status-text" id="statusText">Verbinden...</span>
-    <button class="btn btn-primary" onclick="refresh()">↻ Vernieuwen</button>
+    <div class="pulse" id="dot"></div>
+    <span class="status-text" id="statusText">Laden...</span>
+    <button class="btn btn-primary" onclick="loadData()">↻</button>
   </div>
 </header>
 
 <main>
-
-  <!-- Stats -->
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">Actieve Ventures</div>
-      <div class="stat-value" id="statVentures">—</div>
-      <div class="stat-sub">live systemen</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Totale Loops</div>
-      <div class="stat-value" id="statLoops">—</div>
-      <div class="stat-sub">uitgevoerd</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Acties Vandaag</div>
-      <div class="stat-value" id="statActions">—</div>
-      <div class="stat-sub">deze cyclus</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Herinneringen</div>
-      <div class="stat-value" id="statMemories">—</div>
-      <div class="stat-sub">opgeslagen</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">Actieve Ventures</div><div class="stat-value" id="s1">—</div><div class="stat-sub">live</div></div>
+    <div class="stat-card"><div class="stat-label">Totale Loops</div><div class="stat-value" id="s2">—</div><div class="stat-sub">uitgevoerd</div></div>
+    <div class="stat-card"><div class="stat-label">Acties Vandaag</div><div class="stat-value" id="s3">—</div><div class="stat-sub">cyclus</div></div>
+    <div class="stat-card"><div class="stat-label">Herinneringen</div><div class="stat-value" id="s4">—</div><div class="stat-sub">opgeslagen</div></div>
   </div>
 
-  <!-- Intentie aanpassen -->
   <div class="intent-box">
     <div class="intent-label">Stuur intentie naar Evergreen</div>
-    <input class="intent-input" id="intentInput" type="text" placeholder="bijv. Focus op Belgische accountants, verhoog budget naar €100...">
+    <input class="intent-input" id="intentInput" type="text" placeholder="bijv. Focus op Belgische accountants, verhoog budget...">
     <button class="btn btn-primary" onclick="sendIntent()">Versturen →</button>
   </div>
 
-  <!-- Controls -->
   <div class="section-title">Zelfcontrole</div>
   <div class="controls-grid">
-    <div class="control-card" onclick="triggerAction('restart_self')">
-      <div class="control-icon">🔄</div>
-      <div class="control-label">Herstart</div>
-      <div class="control-desc">Railway herstart Evergreen</div>
-    </div>
-    <div class="control-card" onclick="triggerAction('deploy_netlify')">
-      <div class="control-icon">🚀</div>
-      <div class="control-label">Deploy Dashboard</div>
-      <div class="control-desc">Netlify opnieuw deployen</div>
-    </div>
-    <div class="control-card" onclick="triggerAction('self_improve')">
-      <div class="control-icon">🧬</div>
-      <div class="control-label">Zelfverbetering</div>
-      <div class="control-desc">Code analyseren & fixen</div>
-    </div>
-    <div class="control-card" onclick="triggerAction('research_market')">
-      <div class="control-icon">🔍</div>
-      <div class="control-label">Marktonderzoek</div>
-      <div class="control-desc">Nu uitvoeren</div>
-    </div>
-    <div class="control-card" onclick="triggerAction('analyze_results')">
-      <div class="control-icon">📊</div>
-      <div class="control-label">Analyseer</div>
-      <div class="control-desc">Resultaten doorlichten</div>
-    </div>
-    <div class="control-card" onclick="triggerAction('create_content')">
-      <div class="control-icon">✍️</div>
-      <div class="control-label">Maak Content</div>
-      <div class="control-desc">LinkedIn post genereren</div>
-    </div>
+    <div class="control-card" onclick="trigger('restart_self')"><div class="control-icon">🔄</div><div class="control-label">Herstart</div><div class="control-desc">Railway</div></div>
+    <div class="control-card" onclick="trigger('deploy_netlify')"><div class="control-icon">🚀</div><div class="control-label">Deploy</div><div class="control-desc">Netlify</div></div>
+    <div class="control-card" onclick="trigger('self_improve')"><div class="control-icon">🧬</div><div class="control-label">Zelfverbetering</div><div class="control-desc">Code fixen</div></div>
+    <div class="control-card" onclick="trigger('research_market')"><div class="control-icon">🔍</div><div class="control-label">Onderzoek</div><div class="control-desc">Nu uitvoeren</div></div>
+    <div class="control-card" onclick="trigger('analyze_results')"><div class="control-icon">📊</div><div class="control-label">Analyseer</div><div class="control-desc">Resultaten</div></div>
+    <div class="control-card" onclick="trigger('create_content')"><div class="control-icon">✍️</div><div class="control-label">Content</div><div class="control-desc">LinkedIn post</div></div>
   </div>
 
-  <!-- Ventures + Log -->
   <div class="two-col">
     <div>
       <div class="section-title">Ventures</div>
-      <div id="venturesList">
-        <div class="loading"><div class="spinner"></div>Laden...</div>
-      </div>
+      <div id="venturesList"><div class="spin"></div></div>
     </div>
-
     <div>
+      <div class="section-title">Live Activiteit</div>
       <div class="log-feed">
-        <div class="log-header">
-          <span class="log-title">Live Activiteit</span>
-          <span class="status-text" id="lastUpdate"></span>
-        </div>
-        <div class="log-list" id="logList">
-          <div class="loading"><div class="spinner"></div>Laden...</div>
-        </div>
+        <div class="log-header"><span class="log-title">Acties</span><span class="status-text" id="lastUpdate">—</span></div>
+        <div class="log-list" id="logList"><div class="spin"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Memories -->
   <div class="section-title">Recente Herinneringen</div>
-  <div class="memory-list" id="memoriesList">
-    <div class="loading"><div class="spinner"></div>Laden...</div>
-  </div>
-
+  <div class="memory-list" id="memoriesList"><div class="spin"></div></div>
 </main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
-<!-- Modal -->
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:20px"><div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-family:'DM Serif Display',serif;font-size:20px" id="modalTitle"></h2><button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b6b63">×</button></div><div id="modalBody"></div></div></div>
-
 <script>
-const SUPABASE_URL = 'https://cpdlbkbbiwmzmfnqymbr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
-const API_URL = 'https://evergreen-production-d7f1.up.railway.app';
+const SB = 'https://cpdlbkbbiwmzmfnqymbr.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
+const API = 'https://evergreen-production-d7f1.up.railway.app';
+let ventures = [];
 
-function toast(msg, duration = 3000) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), duration);
+const H = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' };
+
+function toast(m) {
+  const e = document.getElementById('toast');
+  e.textContent = m; e.classList.add('show');
+  setTimeout(() => e.classList.remove('show'), 3000);
 }
 
-async function supabaseQuery(table, params = '') {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  return res.json();
+async function get(table, qs='') {
+  const r = await fetch(`${SB}/rest/v1/${table}?${qs}`, { headers: H });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
 }
 
-function getLogIcon(action) {
-  if (!action) return { cls: 'log-icon-research', icon: '⚡' };
-  if (action.includes('research') || action.includes('find')) return { cls: 'log-icon-research', icon: '🔍' };
-  if (action.includes('content') || action.includes('post')) return { cls: 'log-icon-content', icon: '✍️' };
-  if (action.includes('improve') || action.includes('fix')) return { cls: 'log-icon-improve', icon: '🔧' };
-  if (action.includes('restart') || action.includes('deploy') || action.includes('variable')) return { cls: 'log-icon-control', icon: '⚙️' };
-  if (action.includes('error') || action.includes('fail')) return { cls: 'log-icon-error', icon: '⚠️' };
-  return { cls: 'log-icon-research', icon: '⚡' };
+async function post(table, body) {
+  const r = await fetch(`${SB}/rest/v1/${table}`, { method:'POST', headers:{...H,'Prefer':'return=minimal'}, body: JSON.stringify(body) });
+  return r.ok;
 }
 
-function timeAgo(dateStr) {
-  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (diff < 60) return `${diff}s`;
-  if (diff < 3600) return `${Math.floor(diff/60)}m`;
-  if (diff < 86400) return `${Math.floor(diff/3600)}u`;
-  return `${Math.floor(diff/86400)}d`;
+function vName(v) {
+  const n = v.name || v.original_intent || v.intent || v.title || '';
+  return n.length > 45 ? n.substring(0,45)+'…' : n || 'Venture';
 }
 
-let allVentures = [];
+function ago(d) {
+  const s = Math.floor((Date.now()-new Date(d))/1000);
+  return s<60 ? s+'s' : s<3600 ? Math.floor(s/60)+'m' : Math.floor(s/3600)+'u';
+}
 
-function ventureName(v) {
-  return v.name || v.original_intent || v.intent || v.title || ('Venture ' + (v.id || '').substring(0, 6));
+function icon(t='') {
+  if(/research|find|contact/.test(t)) return ['li-r','🔍'];
+  if(/content|post|publish/.test(t)) return ['li-c','✍️'];
+  if(/improve|fix|hotfix/.test(t)) return ['li-i','🔧'];
+  if(/restart|deploy|variable/.test(t)) return ['li-k','⚙️'];
+  if(/error|fail/.test(t)) return ['li-e','⚠️'];
+  return ['li-r','⚡'];
 }
 
 function openVenture(id) {
-  const v = allVentures.find(x => x.id === id);
-  if (!v) return;
-  document.getElementById('modalTitle').textContent = ventureName(v);
+  const v = ventures.find(x=>x.id===id); if(!v) return;
+  document.getElementById('modalTitle').textContent = vName(v);
   document.getElementById('modalBody').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div class="stat-card"><div class="stat-label">Status</div><div style="font-weight:600;margin-top:4px">${v.status || '—'}</div></div>
-      <div class="stat-card"><div class="stat-label">Loop</div><div style="font-weight:600;margin-top:4px">#${v.loop_count || 0}</div></div>
-      <div class="stat-card"><div class="stat-label">Fase</div><div style="font-weight:600;margin-top:4px">${v.phase || '—'}</div></div>
-      <div class="stat-card"><div class="stat-label">Budget</div><div style="font-weight:600;margin-top:4px">€${v.budget || 0}</div></div>
+    <div class="modal-grid">
+      <div class="modal-field"><div class="mf-label">Status</div><div class="mf-value">${v.status||'—'}</div></div>
+      <div class="modal-field"><div class="mf-label">Loop</div><div class="mf-value">#${v.loop_count||0}</div></div>
+      <div class="modal-field"><div class="mf-label">Fase</div><div class="mf-value">${v.phase||'—'}</div></div>
+      <div class="modal-field"><div class="mf-label">Budget</div><div class="mf-value">€${v.budget||0}</div></div>
     </div>
-    ${v.original_intent ? `<div style="background:var(--gray-1);border-radius:8px;padding:14px;font-size:13px;color:var(--gray-4);line-height:1.5"><strong>Intentie:</strong><br>${v.original_intent}</div>` : ''}
-    ${v.last_action ? `<div style="margin-top:12px;font-size:12px;color:var(--gray-3)">Laatste actie: ${v.last_action}</div>` : ''}
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="sendVentureIntent('${id}')">Stuur intentie</button>
+    ${v.original_intent?`<div class="intent-block">${v.original_intent}</div>`:''}
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="ventureIntent('${id}')">Stuur intentie</button>
       <button class="btn" onclick="closeModal()">Sluiten</button>
-    </div>
-  `;
-  document.getElementById('modal').style.display = 'flex';
+    </div>`;
+  document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modal').style.display = 'none';
+async function ventureIntent(id) {
+  const i = prompt('Intentie voor deze venture:'); if(!i) return;
+  const ok = await post('memories',{content:`[EIGENAAR] ${i}`,venture_id:id,type:'owner_intent',importance:1.0});
+  toast(ok?'✓ Verstuurd':'⚠ Fout'); if(ok) closeModal();
 }
 
-async function sendVentureIntent(ventureId) {
-  const intent = prompt('Stuur een intentie naar deze venture:');
-  if (!intent) return;
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+async function sendIntent() {
+  const el = document.getElementById('intentInput');
+  const i = el.value.trim(); if(!i) return;
+  const ok = await post('memories',{content:`[EIGENAAR] ${i}`,type:'owner_intent',importance:1.0});
+  toast(ok?'✓ Intentie verstuurd':'⚠ Fout');
+  if(ok) { el.value=''; setTimeout(loadData,1000); }
+}
+
+async function trigger(action) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/memories`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ content: `[EIGENAAR → VENTURE] ${intent}`, venture_id: ventureId, type: 'owner_intent', importance: 1.0 })
-    });
-    toast('✓ Intentie verstuurd');
-    closeModal();
-  } catch { toast('⚠ Fout bij versturen'); }
+    const r = await fetch(`${API}/trigger`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});
+    toast(r.ok?`✓ ${action} gestart`:`⚡ ${action} — volgende cyclus`);
+  } catch { toast(`⚡ ${action} — volgende cyclus`); }
 }
 
 async function loadData() {
+  document.getElementById('dot').className='pulse';
+  document.getElementById('statusText').textContent='Laden...';
   try {
     // Ventures
-    const ventures = await supabaseQuery('ventures', 'order=created_at.desc');
-    allVentures = Array.isArray(ventures) ? ventures : [];
-
-    document.getElementById('statVentures').textContent = allVentures.filter(v => v.status === 'active').length || 0;
-    const totalLoops = allVentures.reduce((sum, v) => sum + (v.loop_count || 0), 0);
-    document.getElementById('statLoops').textContent = totalLoops;
-
-    if (allVentures.length > 0) {
-      document.getElementById('venturesList').innerHTML = allVentures.map(v => `
-        <div class="venture-card" onclick="openVenture('${v.id}')" style="cursor:pointer">
+    const vl = await get('ventures','order=created_at.desc');
+    ventures = Array.isArray(vl) ? vl : [];
+    document.getElementById('s1').textContent = ventures.filter(v=>v.status==='active').length;
+    document.getElementById('s2').textContent = ventures.reduce((s,v)=>s+(v.loop_count||0),0);
+    document.getElementById('venturesList').innerHTML = ventures.length
+      ? ventures.map(v=>`
+        <div class="venture-card" onclick="openVenture('${v.id}')">
           <div class="venture-header">
-            <span class="venture-name">${ventureName(v)}</span>
-            <span class="badge badge-${v.status === 'active' ? 'green' : 'amber'}">${(v.status || 'actief').toUpperCase()}</span>
+            <span class="venture-name">${vName(v)}</span>
+            <span class="badge badge-${v.status==='active'?'green':'amber'}">${(v.status||'actief').toUpperCase()}</span>
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((v.loop_count || 0) * 5, 100)}%"></div></div>
-          <div class="venture-meta">
-            <span>Loop #${v.loop_count || 0}</span>
-            <span>${v.phase || 'research'}</span>
-            <span>€${v.budget || 0}</span>
-            <span style="margin-left:auto;color:#b0b0a8">→ details</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      document.getElementById('venturesList').innerHTML = '<div class="loading" style="color:#b0b0a8">Geen ventures gevonden</div>';
-    }
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min((v.loop_count||0)*5,100)}%"></div></div>
+          <div class="venture-meta"><span>Loop #${v.loop_count||0}</span><span>${v.phase||'—'}</span><span>€${v.budget||0}</span></div>
+        </div>`).join('')
+      : '<div class="empty">Geen ventures</div>';
 
-    // Memories - probeer meerdere tabelnamen
-    let memories = [];
-    for (const table of ['memories', 'memory', 'learnings']) {
-      const res = await supabaseQuery(table, 'order=created_at.desc&limit=8');
-      if (Array.isArray(res) && res.length > 0) { memories = res; break; }
-    }
-    document.getElementById('statMemories').textContent = memories.length || 0;
-    document.getElementById('memoriesList').innerHTML = memories.length > 0
-      ? memories.map(m => `
-          <div class="memory-item">
-            <div class="memory-dot"></
+    // Decisions (= acties log)
+    let actions=[];
+    try { const r=await get('decisions','order=created_at.desc&limit=25'); if(Array.isArray(r)) actions=r; } catch{}
+    document.getElementById('s3').textContent = actions.filter(a=>a.created_at&&new Date(a.created_at)>Date.now()-86400000).length;
+    document.getElementById('logList').innerHTML = actions.length
+      ? actions.map(a=>{
+          const t=a.action_type||a.type||a.action||a.decision||'beslissing';
+          const [c,ic]=icon(t);
+          const vn=ventures.find(v=>v.id===a.venture_id);
+          return `<div class="log-item">
+            <div class="log-icon ${c}">${ic}</div>
+            <div style="flex:1"><div class="log-action">${t}</div><div class="log-detail">${vn?vName(vn):(a.venture_id||'').substring(0,8)} ${a.success===true?'✓':a.success===false?'✗':''}</div></div>
+            <div class="log-time">${a.created_at?ago(a.created_at):''}</div>
+          </div>`;}).join('')
+      : '<div class="empty">Geen activiteit</div>';
+
+    // Learnings (= herinneringen)
+    let mems=[];
+    try { const r=await get('learnings','order=created_at.desc&limit=8'); if(Array.isArray(r)) mems=r; } catch{}
+    document.getElementById('s4').textContent = mems.length;
+    document.getElementById('memoriesList').innerHTML = mems.length
+      ? mems.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div class="memory-text">${m.content||m.learning||m.insight||m.text||m.summary||''}</div></div>`).join('')
+      : '<div class="memory-item"><div class="memory-text" style="color:var(--gray-3)">Nog geen learnings</div></div>';
+
+    document.getElementById('dot').className='pulse live';
+    document.getElementById('statusText').textContent='Live';
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('nl-BE');
+  } catch(err) {
+    document.getElementById('dot').className='pulse error';
+    document.getElementById('statusText').textContent='Verbindingsfout';
+    console.error(err);
+  }
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
