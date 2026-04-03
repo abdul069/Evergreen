@@ -15,11 +15,32 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()]
 })
 
+// Acties die NOOIT uitgevoerd mogen worden
+const BLOCKED_ACTIONS = [
+  'send_outreach_email',
+  'follow_up_contacts',
+  'send_proposal',
+  'send_email',
+  'email_contacts',
+  'cold_email',
+]
+
 export class Executor {
 
   static async execute(venture: Venture, action: PlannedAction): Promise<ExecutionResult> {
     const actionType = String(action.type || '')
     logger.info('[EXECUTOR] ' + actionType)
+
+    // Blokkeer e-mail acties volledig
+    if (BLOCKED_ACTIONS.includes(actionType)) {
+      logger.warn('[EXECUTOR] Geblokkeerde actie: ' + actionType + ' — geen e-mails toegestaan')
+      return {
+        success: false,
+        error: 'Actie geblokkeerd: e-mails sturen naar mensen is niet toegestaan in deze venture.',
+        significance: 0.1,
+        learnings: 'Gebruik publieke platformen (Reddit, IndieHackers, ProductHunt) voor validatie. Geen directe e-mails.'
+      }
+    }
 
     try {
       const operational = await ThinkEngine.operationalThink(
@@ -31,6 +52,7 @@ export class Executor {
 
       switch (actionType) {
 
+        // ── Onderzoek ──────────────────────────────────
         case 'research_market':
           return await ResearchTools.researchMarket(
             venture,
@@ -49,40 +71,43 @@ export class Executor {
         case 'analyze_results':
           return await ResearchTools.analyzeResults(venture, operational)
 
-        case 'send_outreach_email':
-          return await CommunicationTools.sendOutreachEmails(
+        // ── Validatie via publieke platformen ──────────
+        case 'validate_idea':
+        case 'post_on_reddit':
+        case 'post_on_indiehackers':
+        case 'post_on_producthunt':
+        case 'publish_on_platform':
+          return await CommunicationTools.createAndPublishContent(
             venture,
-            action.params || {},
-            operational
-          )
-
-        case 'follow_up_contacts':
-          return await CommunicationTools.followUpContacts(venture, operational)
-
-        case 'send_proposal':
-          return await CommunicationTools.sendProposal(
-            venture,
-            String(action.params?.contact_id || ''),
+            String(action.params?.platform || 'reddit'),
             operational
           )
 
         case 'create_content':
           return await CommunicationTools.createAndPublishContent(
             venture,
-            String(action.params?.platform || 'linkedin'),
+            String(action.params?.platform || 'reddit'),
             operational
           )
 
+        // ── Bouwen ────────────────────────────────────
         case 'setup_infrastructure':
+        case 'create_account':
+        case 'setup_service':
           return await InfrastructureTools.setupBasicInfrastructure(venture, operational)
 
         case 'build_feature':
+        case 'build_product':
+        case 'build_mvp':
+        case 'create_landing_page':
           return await InfrastructureTools.buildAndDeploy(
             venture,
-            String(action.params?.feature || ''),
+            String(action.params?.feature || action.params?.description || 'MVP'),
             operational
           )
 
+        // ── Monetisatie ───────────────────────────────
+        case 'setup_payment':
         case 'create_invoice':
           return await FinancialTools.createInvoice(
             venture,
@@ -92,6 +117,7 @@ export class Executor {
             operational
           )
 
+        // ── Zelfverbetering ───────────────────────────
         case 'self_improve':
         case 'fix_bugs':
         case 'improve_code':
@@ -104,6 +130,16 @@ export class Executor {
             String(action.params?.description || operational.reasoning)
           )
 
+        // ── Strategie ─────────────────────────────────
+        case 'update_strategy':
+        case 'pivot':
+          return {
+            success: true,
+            output: { reasoning: String(operational.reasoning || '') },
+            significance: 0.7,
+            learnings: String(operational.reasoning || '').substring(0, 200)
+          }
+
         case 'request_budget_approval':
           return {
             success: true,
@@ -112,21 +148,13 @@ export class Executor {
             learnings: 'Budget aanvraag verstuurd naar eigenaar'
           }
 
-        case 'update_strategy':
-          return {
-            success: true,
-            output: { reasoning: String(operational.reasoning || '') },
-            significance: 0.7,
-            learnings: String(operational.reasoning || '').substring(0, 200)
-          }
-
         default:
           logger.warn('Onbekend actie type: ' + actionType)
           return {
             success: false,
             error: 'Onbekend actie type: ' + actionType,
             significance: 0.1,
-            learnings: 'Actie type "' + actionType + '" bestaat niet. Gebruik bekende types.'
+            learnings: 'Actie type "' + actionType + '" bestaat niet. Beschikbare types: research_market, validate_idea, build_product, create_landing_page, setup_payment, analyze_results, update_strategy, self_improve.'
           }
       }
     } catch (err: any) {
