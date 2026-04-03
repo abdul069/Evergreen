@@ -101,7 +101,7 @@ export class NotificationService {
   private static async sendEmail(to: string, subject: string, html: string): Promise<void> {
     try {
       await resend.emails.send({
-        from: `Evergreen <noreply@${process.env.MAILGUN_DOMAIN || 'evergreen.ai'}>`,
+        from: `Evergreen <noreply@${process.env.RESEND_FROM_DOMAIN || 'creacraft.be'}>`,
         to,
         subject,
         html
