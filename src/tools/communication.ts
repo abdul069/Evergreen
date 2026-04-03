@@ -50,8 +50,8 @@ export class CommunicationTools {
           intentText.substring(0, 200) + '\n\nZou u open staan voor een kort gesprek?\n\nMet vriendelijke groeten,\n' + projectName
 
       try {
-        const fromEmail = String(venture.project_email || 'noreply@evergreen.ai')
-        const domain = String(process.env.MAILGUN_DOMAIN || 'evergreen.ai')
+        const fromEmail = String(venture.project_email || 'noreply@creacraft.be')
+        const domain = String(process.env.RESEND_FROM_DOMAIN || 'creacraft.be')
 
         await resend.emails.send({
           from: 'Evergreen <noreply@' + domain + '>',
@@ -111,7 +111,7 @@ export class CommunicationTools {
     }
 
     let sentCount = 0
-    const domain = String(process.env.MAILGUN_DOMAIN || 'evergreen.ai')
+    const domain = String(process.env.RESEND_FROM_DOMAIN || 'creacraft.be')
     const projectName = String(venture.project_name || 'ons team')
     const opContent = String(operational.content || 'Heeft u de kans gehad om mijn voorstel te bekijken?')
 
