@@ -57,7 +57,20 @@ export class Memory {
   }
 
   static async saveDecision(decision: any): Promise<Decision | null> {
-    const { data, error } = await supabase.from('decisions').insert(decision).select().single()
+    // Sanitize: zorg dat NOT NULL kolommen nooit undefined/null zijn
+    const safe = {
+      ...decision,
+      reasoning: decision.reasoning != null && decision.reasoning !== ''
+        ? String(decision.reasoning)
+        : 'Geen redenering opgegeven',
+      action_type: decision.action_type != null
+        ? String(decision.action_type)
+        : 'unknown',
+      venture_id: decision.venture_id != null
+        ? String(decision.venture_id)
+        : '',
+    }
+    const { data, error } = await supabase.from('decisions').insert(safe).select().single()
     if (error) { logger.error('saveDecision: ' + error.message); return null }
     return data
   }
@@ -114,7 +127,17 @@ export class Memory {
   }
 
   static async saveLearning(learning: any): Promise<void> {
-    const { error } = await supabase.from('learnings').insert(learning)
+    // Sanitize: zorg dat insight nooit null is
+    const safe = {
+      ...learning,
+      insight: learning.insight != null && learning.insight !== ''
+        ? String(learning.insight)
+        : 'Geen inzicht opgegeven',
+      category: learning.category != null
+        ? String(learning.category)
+        : 'general',
+    }
+    const { error } = await supabase.from('learnings').insert(safe)
     if (error) logger.error('saveLearning: ' + error.message)
   }
 
