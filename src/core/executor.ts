@@ -5,6 +5,7 @@ import { ResearchTools } from '../tools/research'
 import { InfrastructureTools } from '../tools/infrastructure'
 import { FinancialTools } from '../tools/financial'
 import { SelfImprovementTools } from '../tools/selfimprove'
+import { restartSelf, deployNetlify, setRailwayVariable } from '../tools/selfcontrol'
 import winston from 'winston'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -130,6 +131,47 @@ export class Executor {
             String(action.params?.description || operational.reasoning)
           )
 
+        // ── Zelfcontrole ──────────────────────────────
+        case 'restart_self':
+          const restartResult = await restartSelf()
+          logger.info('[SELFCONTROL] ' + restartResult)
+          return {
+            success: true,
+            output: { message: restartResult },
+            significance: 0.9,
+            learnings: 'Evergreen heeft zichzelf succesvol herstart via Railway API.'
+          }
+
+        case 'deploy_netlify':
+          const netlifyResult = await deployNetlify()
+          logger.info('[SELFCONTROL] ' + netlifyResult)
+          return {
+            success: true,
+            output: { message: netlifyResult },
+            significance: 0.8,
+            learnings: 'Netlify dashboard succesvol gedeployed.'
+          }
+
+        case 'set_variable':
+          const key = String(action.params?.key || '')
+          const value = String(action.params?.value || '')
+          if (!key) {
+            return {
+              success: false,
+              error: 'set_variable vereist een key parameter.',
+              significance: 0.1,
+              learnings: 'Geef altijd key en value mee bij set_variable.'
+            }
+          }
+          const varResult = await setRailwayVariable(key, value)
+          logger.info('[SELFCONTROL] ' + varResult)
+          return {
+            success: true,
+            output: { message: varResult },
+            significance: 0.85,
+            learnings: `Railway variable ${key} succesvol bijgewerkt.`
+          }
+
         // ── Strategie ─────────────────────────────────
         case 'update_strategy':
         case 'pivot':
@@ -154,7 +196,7 @@ export class Executor {
             success: false,
             error: 'Onbekend actie type: ' + actionType,
             significance: 0.1,
-            learnings: 'Actie type "' + actionType + '" bestaat niet. Beschikbare types: research_market, validate_idea, build_product, create_landing_page, setup_payment, analyze_results, update_strategy, self_improve.'
+            learnings: 'Actie type "' + actionType + '" bestaat niet. Beschikbare types: research_market, validate_idea, build_product, create_landing_page, setup_payment, analyze_results, update_strategy, self_improve, restart_self, deploy_netlify, set_variable.'
           }
       }
     } catch (err: any) {
