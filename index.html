@@ -14,280 +14,217 @@ header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 2
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
 .hmeta{font-size:10px;color:var(--muted);display:flex;gap:12px;align-items:center}
 .rbtn{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font);font-size:9px;padding:3px 10px;cursor:pointer}
-
-/* STATUS PANEL */
-#status-panel{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:45vh;overflow-y:auto}
+#status-panel{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:40vh;overflow-y:auto}
 .status-loading{color:var(--muted);font-size:11px;font-style:italic}
 .status-content{font-size:12px;line-height:1.8;color:var(--text2)}
-.status-content strong{color:var(--green)}
-.status-content .warn{color:#ffb700}
-.stats-row{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
-.stat{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:11px}
-.stat-val{font-size:18px;font-weight:700;color:var(--green);display:block}
+.status-content b{color:var(--green)}
+.stats-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px}
+.stat-val{font-size:20px;font-weight:700;color:var(--green);display:block}
 .stat-lbl{color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
-
-/* CHAT */
-#chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:85%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
+#chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
 .msg.user{align-self:flex-end;background:#0f2035;border:1px solid #1a3550;color:var(--cyan)}
 .msg.ai{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
-.msg.ai strong{color:var(--green)}
-.msg.system{align-self:center;background:transparent;color:var(--muted);font-size:10px;letter-spacing:1px;border:none;padding:4px}
+.msg.ai b{color:var(--green)}
+.msg.sys{align-self:center;color:var(--muted);font-size:10px;letter-spacing:1px}
 .msg.cmd{align-self:flex-end;background:#002218;border:1px solid #004030;color:var(--green)}
-
-/* INPUT */
+.typing{display:flex;gap:4px;align-items:center}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
 #input-area{border-top:1px solid var(--border);padding:12px 20px;flex-shrink:0;background:var(--bg)}
 .input-row{display:flex;gap:8px;align-items:flex-end}
 #msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;padding:10px 14px;resize:none;outline:none;max-height:100px;min-height:40px}
 #msg-input:focus{border-color:var(--cyan)}
 #msg-input::placeholder{color:var(--muted)}
-.send-btn{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
-.cmd-hint{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1px}
-
-/* TYPING */
-.typing{display:flex;gap:4px;align-items:center;padding:10px 14px}
-.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typing 1.2s ease-in-out infinite}
-.typing span:nth-child(2){animation-delay:.2s}
-.typing span:nth-child(3){animation-delay:.4s}
-
+.send-btn{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer}
+.hint{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1px}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.8)}}
-@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-@media(max-width:600px){#status-panel{max-height:35vh}.stats-row{gap:8px}.stat{padding:6px 10px}}
+@keyframes blink{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+@media(max-width:600px){#status-panel{max-height:35vh}.stats-row{gap:8px}#main{padding:14px 16px}}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo"><div class="dot"></div>EVERGREEN</div>
   <div class="hmeta">
-    <span id="last-upd"></span>
-    <button class="rbtn" onclick="refreshStatus()">↻ status</button>
+    <span id="upd"></span>
+    <button class="rbtn" onclick="loadStatus()">↻ status</button>
   </div>
 </header>
 
-<div id="status-panel">
-  <div class="status-loading">Status laden...</div>
-</div>
+<div id="status-panel"><div class="status-loading">Laden...</div></div>
 
 <div id="chat-area">
-  <div class="msg system">Stel een vraag of geef een commando aan Evergreen</div>
+  <div class="msg sys">Stel een vraag of geef een commando aan Evergreen</div>
 </div>
 
 <div id="input-area">
   <div class="input-row">
-    <textarea id="msg-input" placeholder="Vraag iets of geef een commando... (bijv. 'wat doet hij nu?' of '/pause')" rows="1"></textarea>
-    <button class="send-btn" onclick="send()">Sturen</button>
+    <textarea id="msg-input" placeholder="Vraag iets of typ een commando (/pause /resume /pivot)" rows="1"></textarea>
+    <button class="send-btn" onclick="send()">➤</button>
   </div>
-  <div class="cmd-hint">Commando's: /pause · /restart · /status · /pivot [richting]</div>
+  <div class="hint">Commando's: /pause · /resume · /status · /pivot [richting]</div>
 </div>
 
 <script>
-const SB_URL='https://cpdlbkbbiwmzmfnqymbr.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
-const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+let data = null
+let history = []
 
-let evergreenData = null;
-let chatHistory = [];
-
-async function sbGet(table,q){
-  const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+q,{headers:H});
-  return r.json();
+async function api(params, body) {
+  const q = new URLSearchParams(params).toString()
+  const opts = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}
+  const r = await fetch('/api?' + q, opts)
+  return r.json()
 }
 
-async function sbPatch(table,filter,body){
-  const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(body)});
-  return r.json();
-}
+async function loadStatus() {
+  document.getElementById('status-panel').innerHTML = '<div class="status-loading">Status laden...</div>'
+  try {
+    const [ventures, decisions, learnings] = await Promise.all([
+      api({ action: 'data', table: 'ventures', q: 'select=*&status=eq.active&order=created_at.desc' }),
+      api({ action: 'data', table: 'decisions', q: 'select=*&order=created_at.desc&limit=15' }),
+      api({ action: 'data', table: 'learnings', q: 'select=*&order=created_at.desc&limit=10' })
+    ])
+    data = { ventures, decisions, learnings }
+    const ctx = buildContext(data)
+    const v = ventures?.[0]
 
-async function callClaude(messages, system){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
-      system: system,
-      messages: messages
+    const resp = await api({ action: 'chat' }, {
+      system: 'Jij bent de assistent van Evergreen, een autonoom AI dat een digitaal product zoekt en bouwt. Geef een korte samenvatting (max 3 zinnen) in gewone Nederlandse taal. Geen technisch jargon. Huidige staat:\n\n' + ctx,
+      messages: [{ role: 'user', content: 'Wat doet Evergreen nu en gaat het goed?' }]
     })
-  });
-  const d=await r.json();
-  return d.content?.[0]?.text||'Geen antwoord';
+    const summary = resp.content?.[0]?.text || 'Kon status niet laden'
+
+    const budget = v ? (v.budget_total - (v.budget_spent || 0)).toFixed(0) : '—'
+    document.getElementById('status-panel').innerHTML = `
+      <div class="status-content">${md(summary)}</div>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-lbl">TICK</span><span class="stat-val">#${v?.loop_count || 0}</span></div>
+        <div class="stat"><span class="stat-lbl">BUDGET</span><span class="stat-val">€${budget}</span></div>
+        <div class="stat"><span class="stat-lbl">OMZET</span><span class="stat-val">€${(v?.revenue_total || 0).toFixed(0)}</span></div>
+        <div class="stat"><span class="stat-lbl">INTERVAL</span><span class="stat-val">${v?.loop_interval_minutes || '—'}m</span></div>
+      </div>`
+    document.getElementById('upd').textContent = 'bijgewerkt ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })
+  } catch (e) {
+    document.getElementById('status-panel').innerHTML = '<div class="status-loading" style="color:var(--red)">Fout: ' + e.message + '</div>'
+  }
 }
 
-async function fetchData(){
-  const[ventures,decisions,learnings]=await Promise.all([
-    sbGet('ventures','select=*&status=eq.active&order=created_at.desc'),
-    sbGet('decisions','select=*&order=created_at.desc&limit=15'),
-    sbGet('learnings','select=*&order=created_at.desc&limit=10')
-  ]);
-  return {ventures,decisions,learnings};
-}
-
-function dataToContext(data){
-  const v=data.ventures?.[0];
-  if(!v) return 'Geen actieve ventures gevonden.';
-  const dec=data.decisions?.filter(d=>d.venture_id===v.id)||[];
-  const learn=data.learnings?.filter(l=>l.venture_id===v.id)||[];
-  return `VENTURE: ${v.project_name} (TICK #${v.loop_count})
-INTENTIE: ${v.evolved_intent||v.original_intent}
-FASE: ${v.phase}
-BUDGET: €${(v.budget_total-(v.budget_spent||0)).toFixed(0)} resterend van €${v.budget_total}
-OMZET: €${(v.revenue_total||0).toFixed(0)}
-CONTACTEN: ${v.contacts_discovered||0} gevonden, ${v.contacts_converted||0} conversies
-VOLGENDE LOOP: ${v.next_loop_at}
-INTERVAL: ${v.loop_interval_minutes}m
+function buildContext(d) {
+  const v = d.ventures?.[0]
+  if (!v) return 'Geen actieve ventures.'
+  const dec = d.decisions?.filter(x => x.venture_id === v.id) || []
+  const lea = d.learnings?.filter(x => x.venture_id === v.id) || []
+  return `VENTURE: ${v.project_name} TICK #${v.loop_count}
+INTENTIE: ${v.evolved_intent || v.original_intent}
+FASE: ${v.phase} | BUDGET: €${(v.budget_total - (v.budget_spent || 0)).toFixed(0)} | OMZET: €${(v.revenue_total || 0).toFixed(0)}
+CONTACTEN: ${v.contacts_discovered || 0} gevonden
 
 RECENTE ACTIES:
-${dec.slice(0,8).map(d=>`- ${d.action_type}: ${d.success?'succes':'fout'} | ${(d.reasoning||'').substring(0,100)}`).join('\n')}
+${dec.slice(0, 8).map(d => `- ${d.action_type}: ${d.success ? 'OK' : 'FOUT'} | ${(d.reasoning || '').substring(0, 100)}`).join('\n')}
 
-LAATSTE INZICHTEN:
-${learn.slice(0,5).map(l=>`- ${(l.insight||'').substring(0,120)}`).join('\n')}`;
+INZICHTEN:
+${lea.slice(0, 5).map(l => `- ${(l.insight || '').substring(0, 120)}`).join('\n')}`
 }
 
-async function refreshStatus(){
-  document.getElementById('status-panel').innerHTML='<div class="status-loading">Status laden...</div>';
-  try{
-    evergreenData=await fetchData();
-    const ctx=dataToContext(evergreenData);
-    const v=evergreenData.ventures?.[0];
-    
-    const summary=await callClaude([{role:'user',content:'Geef een korte heldere samenvatting in het Nederlands van wat Evergreen nu doet, of het goed gaat, en wat het grootste knelpunt is. Max 3 zinnen. Gebruik gewone taal, geen technische termen.'}],
-      'Jij bent de assistent van Evergreen, een autonoom AI-systeem dat een digitaal product bouwt. Hier is de huidige staat:\n\n'+ctx
-    );
-    
-    const budget=v?(v.budget_total-(v.budget_spent||0)).toFixed(0):'—';
-    document.getElementById('status-panel').innerHTML=`
-      <div class="status-content">${summary.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
-      <div class="stats-row">
-        <div class="stat"><span class="stat-lbl">TICK</span><span class="stat-val">#${v?.loop_count||0}</span></div>
-        <div class="stat"><span class="stat-lbl">BUDGET</span><span class="stat-val">€${budget}</span></div>
-        <div class="stat"><span class="stat-lbl">OMZET</span><span class="stat-val">€${(v?.revenue_total||0).toFixed(0)}</span></div>
-        <div class="stat"><span class="stat-lbl">LOOPS</span><span class="stat-val">${v?.loop_interval_minutes||'—'}m</span></div>
-      </div>`;
-    document.getElementById('last-upd').textContent='bijgewerkt '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){
-    document.getElementById('status-panel').innerHTML='<div class="status-loading" style="color:var(--red)">Fout: '+e.message+'</div>';
-  }
+function md(t) { return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>') }
+
+function addMsg(text, type) {
+  const chat = document.getElementById('chat-area')
+  const div = document.createElement('div')
+  div.className = 'msg ' + type
+  div.innerHTML = md(text)
+  chat.appendChild(div)
+  chat.scrollTop = chat.scrollHeight
+  return div
 }
 
-function addMsg(text,type){
-  const chat=document.getElementById('chat-area');
-  const div=document.createElement('div');
-  div.className='msg '+type;
-  div.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
-  return div;
+function addTyping() {
+  const chat = document.getElementById('chat-area')
+  const div = document.createElement('div')
+  div.className = 'msg ai'
+  div.id = 'typing'
+  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>'
+  chat.appendChild(div)
+  chat.scrollTop = chat.scrollHeight
 }
 
-function addTyping(){
-  const chat=document.getElementById('chat-area');
-  const div=document.createElement('div');
-  div.className='msg ai';
-  div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
-  div.id='typing-indicator';
-  chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
-}
+function removeTyping() { document.getElementById('typing')?.remove() }
 
-function removeTyping(){
-  const t=document.getElementById('typing-indicator');
-  if(t) t.remove();
-}
+async function handleCmd(cmd) {
+  const parts = cmd.trim().split(' ')
+  const verb = parts[0].toLowerCase()
+  const v = data?.ventures?.[0]
+  if (!v) { addMsg('Geen actieve venture gevonden.', 'sys'); return }
 
-async function handleCommand(cmd){
-  const parts=cmd.toLowerCase().trim().split(' ');
-  const verb=parts[0];
-  
-  if(verb==='/pause'||verb==='/stop'){
-    addMsg('⏸ Evergreen wordt gepauzeerd...','system');
-    const v=evergreenData?.ventures?.[0];
-    if(v){
-      await sbPatch('ventures','id=eq.'+v.id,{status:'paused'});
-      addMsg('✓ Evergreen is gepauzeerd. Gebruik /resume om te hervatten.','ai');
-    }
-  } else if(verb==='/resume'||verb==='/start'){
-    addMsg('▶ Evergreen wordt hervat...','system');
-    const v=evergreenData?.ventures?.[0];
-    if(v){
-      await sbPatch('ventures','id=eq.'+v.id,{status:'active'});
-      addMsg('✓ Evergreen is hervat.','ai');
-    }
-  } else if(verb==='/status'){
-    await refreshStatus();
-    addMsg('Status bijgewerkt.','system');
-  } else if(verb==='/pivot'){
-    const newDir=parts.slice(1).join(' ');
-    if(!newDir){addMsg('Gebruik: /pivot [nieuwe richting]','system');return;}
-    const v=evergreenData?.ventures?.[0];
-    if(v){
-      await sbPatch('ventures','id=eq.'+v.id,{evolved_intent:newDir});
-      addMsg('✓ Richting bijgewerkt naar: '+newDir,'ai');
-      evergreenData=await fetchData();
-    }
+  if (verb === '/pause' || verb === '/stop') {
+    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { status: 'paused' } })
+    addMsg('✓ Evergreen is gepauzeerd.', 'ai')
+  } else if (verb === '/resume' || verb === '/start') {
+    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { status: 'active' } })
+    addMsg('✓ Evergreen is hervat.', 'ai')
+  } else if (verb === '/status') {
+    await loadStatus()
+    addMsg('Status bijgewerkt.', 'sys')
+  } else if (verb === '/pivot') {
+    const dir = parts.slice(1).join(' ')
+    if (!dir) { addMsg('Gebruik: /pivot [nieuwe richting]', 'sys'); return }
+    await api({ action: 'update' }, { table: 'ventures', filter: 'id=eq.' + v.id, data: { evolved_intent: dir } })
+    addMsg('✓ Richting bijgewerkt: ' + dir, 'ai')
+    data = null
+    await loadStatus()
   } else {
-    addMsg('Onbekend commando. Beschikbaar: /pause · /resume · /status · /pivot [richting]','system');
+    addMsg('Onbekend commando. Gebruik: /pause · /resume · /status · /pivot [richting]', 'sys')
   }
 }
 
-async function send(){
-  const input=document.getElementById('msg-input');
-  const text=input.value.trim();
-  if(!text) return;
-  input.value='';
-  input.style.height='40px';
-  
-  if(text.startsWith('/')){
-    addMsg(text,'cmd');
-    await handleCommand(text);
-    return;
+async function send() {
+  const input = document.getElementById('msg-input')
+  const text = input.value.trim()
+  if (!text) return
+  input.value = ''
+  input.style.height = '40px'
+
+  if (text.startsWith('/')) {
+    addMsg(text, 'cmd')
+    await handleCmd(text)
+    return
   }
-  
-  addMsg(text,'user');
-  chatHistory.push({role:'user',content:text});
-  
-  addTyping();
-  
-  try{
-    if(!evergreenData) evergreenData=await fetchData();
-    const ctx=dataToContext(evergreenData);
-    
-    const reply=await callClaude(
-      chatHistory,
-      `Jij bent de assistent van Evergreen, een autonoom AI-systeem dat zoekt naar een digitaal product om te bouwen en verkopen. Je helpt de eigenaar het systeem te begrijpen.
 
-Antwoord altijd in het Nederlands. Wees direct en duidelijk. Geen technisch jargon.
+  addMsg(text, 'user')
+  history.push({ role: 'user', content: text })
+  addTyping()
 
-Als iemand wil dat Evergreen iets doet (pauzeren, andere richting, etc.) leg uit dat ze commando's kunnen gebruiken: /pause, /resume, /pivot [richting], /status.
-
-Huidige staat van Evergreen:
-${ctx}`
-    );
-    
-    removeTyping();
-    addMsg(reply,'ai');
-    chatHistory.push({role:'assistant',content:reply});
-    
-    if(chatHistory.length>20){chatHistory=chatHistory.slice(-20);}
-  }catch(e){
-    removeTyping();
-    addMsg('Fout bij het laden van antwoord: '+e.message,'ai');
+  try {
+    if (!data) data = { ventures: await api({ action: 'data', table: 'ventures', q: 'select=*&status=eq.active' }), decisions: [], learnings: [] }
+    const ctx = buildContext(data)
+    const resp = await api({ action: 'chat' }, {
+      system: `Jij bent de assistent van Evergreen. Antwoord altijd in het Nederlands. Wees kort en duidelijk. Geen jargon. Als de gebruiker iets wil veranderen, wijs op commando's: /pause /resume /pivot /status.\n\nHuidige staat:\n${ctx}`,
+      messages: history
+    })
+    const reply = resp.content?.[0]?.text || 'Geen antwoord'
+    removeTyping()
+    addMsg(reply, 'ai')
+    history.push({ role: 'assistant', content: reply })
+    if (history.length > 20) history = history.slice(-20)
+  } catch (e) {
+    removeTyping()
+    addMsg('Fout: ' + e.message, 'ai')
   }
 }
 
-// Auto-resize textarea
-document.getElementById('msg-input').addEventListener('input',function(){
-  this.style.height='40px';
-  this.style.height=Math.min(this.scrollHeight,100)+'px';
-});
+document.getElementById('msg-input').addEventListener('input', function () {
+  this.style.height = '40px'
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px'
+})
+document.getElementById('msg-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+})
 
-document.getElementById('msg-input').addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
-});
-
-// Auto-refresh elke 5 minuten
-refreshStatus();
-setInterval(refreshStatus,5*60*1000);
+loadStatus()
+setInterval(loadStatus, 5 * 60 * 1000)
 </script>
 </body>
 </html>
