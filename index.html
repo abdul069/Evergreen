@@ -3,113 +3,291 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Evergreen Dashboard</title>
+<title>Evergreen</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#060a0f;--bg2:#0a1018;--bg3:#0d1520;--border:#1a2535;--border2:#0f1e30;--green:#00ff87;--cyan:#00cfff;--red:#ff5533;--muted:#3a5068;--muted2:#2a4060;--text:#d0e0ef;--text2:#7a9ab0;--font:'IBM Plex Mono',monospace}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:13px}
-header{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:12px;font-weight:700;letter-spacing:5px;color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:10px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
-.meta{display:flex;align-items:center;gap:16px;font-size:11px;color:var(--muted)}
-.btn{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--font);font-size:10px;padding:4px 12px;cursor:pointer}
-#main{padding:20px 24px;max-width:920px;margin:0 auto}
-.card{background:var(--bg3);border:1px solid #003520;border-radius:10px;padding:20px;margin-bottom:14px}
-.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:12px}
-.name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.badge{font-size:10px;color:var(--muted);letter-spacing:2px;padding:2px 8px;border:1px solid var(--border);border-radius:3px}
-.intent{font-size:11px;color:#3a7060;line-height:1.6;max-width:520px}
-.nl{text-align:right;flex-shrink:0}
-.nl-label{font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:4px}
-.nl-time{font-size:14px;font-weight:700;color:var(--cyan)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.stat{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:14px 16px}
-.sl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-.sv{font-size:24px;font-weight:700;color:var(--green)}
-.ss{font-size:10px;color:var(--muted2);margin-top:4px}
-.section{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px}
-.slabel{font-size:9px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border2)}
-.dr{padding:10px 0;border-bottom:1px solid var(--border2)}
-.dr:last-child{border-bottom:none}
-.ab{font-size:9px;padding:3px 8px;border-radius:4px;background:#0f2035;color:var(--cyan);border:1px solid #1a3550;letter-spacing:1px}
-.ok{background:#002218;color:var(--green);border:1px solid #004030;font-size:9px;padding:2px 6px;border-radius:3px}
-.fail{background:#2a0a00;color:var(--red);border:1px solid #5a1a00;font-size:9px;padding:2px 6px;border-radius:3px}
-.dm{display:flex;gap:8px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
-.dt{font-size:10px;color:var(--muted2)}
-.dr-text{font-size:11px;color:var(--text2);line-height:1.5}
-.li{padding:9px 0;border-bottom:1px solid var(--border2);font-size:11px;color:#6a8aa0;line-height:1.6;display:flex;gap:8px}
-.li:last-child{border-bottom:none}
-.rb{border-left:2px solid var(--green);padding-left:14px;margin:10px 0;font-size:12px;color:var(--text2);line-height:1.7}
-.err{background:#1a0800;border:1px solid #5a1a00;border-radius:6px;padding:12px 16px;color:var(--red);font-size:11px;margin-bottom:14px}
-.empty{text-align:center;color:var(--muted);padding:40px;font-size:11px}
+:root{--bg:#060a0f;--bg2:#0a1018;--bg3:#0d1520;--border:#1a2535;--green:#00ff87;--cyan:#00cfff;--red:#ff5533;--muted:#3a5068;--text:#d0e0ef;--text2:#7a9ab0;--font:'IBM Plex Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh;display:flex;flex-direction:column;font-size:13px}
+header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{font-size:11px;font-weight:700;letter-spacing:5px;color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+.hmeta{font-size:10px;color:var(--muted);display:flex;gap:12px;align-items:center}
+.rbtn{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font);font-size:9px;padding:3px 10px;cursor:pointer}
+
+/* STATUS PANEL */
+#status-panel{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:45vh;overflow-y:auto}
+.status-loading{color:var(--muted);font-size:11px;font-style:italic}
+.status-content{font-size:12px;line-height:1.8;color:var(--text2)}
+.status-content strong{color:var(--green)}
+.status-content .warn{color:#ffb700}
+.stats-row{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:11px}
+.stat-val{font-size:18px;font-weight:700;color:var(--green);display:block}
+.stat-lbl{color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+
+/* CHAT */
+#chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6}
+.msg.user{align-self:flex-end;background:#0f2035;border:1px solid #1a3550;color:var(--cyan)}
+.msg.ai{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.msg.ai strong{color:var(--green)}
+.msg.system{align-self:center;background:transparent;color:var(--muted);font-size:10px;letter-spacing:1px;border:none;padding:4px}
+.msg.cmd{align-self:flex-end;background:#002218;border:1px solid #004030;color:var(--green)}
+
+/* INPUT */
+#input-area{border-top:1px solid var(--border);padding:12px 20px;flex-shrink:0;background:var(--bg)}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+#msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:12px;padding:10px 14px;resize:none;outline:none;max-height:100px;min-height:40px}
+#msg-input:focus{border-color:var(--cyan)}
+#msg-input::placeholder{color:var(--muted)}
+.send-btn{background:var(--green);color:#000;border:none;border-radius:6px;padding:10px 16px;font-family:var(--font);font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
+.cmd-hint{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+
+/* TYPING */
+.typing{display:flex;gap:4px;align-items:center;padding:10px 14px}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typing 1.2s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.8)}}
-@media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}#main{padding:14px 16px}.top{flex-direction:column}.nl{text-align:left}}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+@media(max-width:600px){#status-panel{max-height:35vh}.stats-row{gap:8px}.stat{padding:6px 10px}}
 </style>
 </head>
 <body>
+
 <header>
-<div class="logo"><div class="dot"></div>EVERGREEN</div>
-<div class="meta">
-<span id="lr"></span>
-<span id="ct"></span>
-<button class="btn" onclick="load()">↻ nu</button>
-</div>
+  <div class="logo"><div class="dot"></div>EVERGREEN</div>
+  <div class="hmeta">
+    <span id="last-upd"></span>
+    <button class="rbtn" onclick="refreshStatus()">↻ status</button>
+  </div>
 </header>
-<div id="main">
-<div id="eb" class="err" style="display:none"></div>
-<div id="content"><div class="empty">laden...</div></div>
+
+<div id="status-panel">
+  <div class="status-loading">Status laden...</div>
 </div>
+
+<div id="chat-area">
+  <div class="msg system">Stel een vraag of geef een commando aan Evergreen</div>
+</div>
+
+<div id="input-area">
+  <div class="input-row">
+    <textarea id="msg-input" placeholder="Vraag iets of geef een commando... (bijv. 'wat doet hij nu?' of '/pause')" rows="1"></textarea>
+    <button class="send-btn" onclick="send()">Sturen</button>
+  </div>
+  <div class="cmd-hint">Commando's: /pause · /restart · /status · /pivot [richting]</div>
+</div>
+
 <script>
-const REFRESH=30;
-let cd=REFRESH;
-const URL='https://cpdlbkbbiwmzmfnqymbr.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
-const H={'apikey':KEY,'Authorization':'Bearer '+KEY};
-function e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function ago(iso){if(!iso)return'—';const d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return d+'s';if(d<3600)return Math.floor(d/60)+'m';return Math.floor(d/3600)+'u'}
-function ft(iso){if(!iso)return'—';return new Date(iso).toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'})}
-async function get(t,q){const r=await fetch(URL+'/rest/v1/'+t+'?'+q,{headers:H});if(!r.ok)throw new Error(r.status+': '+r.statusText);return r.json()}
-async function load(){
-const eb=document.getElementById('eb');eb.style.display='none';
-try{
-const[v,d,l]=await Promise.all([
-get('ventures','select=*&status=eq.active&order=created_at.desc'),
-get('decisions','select=*&order=created_at.desc&limit=10'),
-get('learnings','select=*&order=created_at.desc&limit=6')
-]);
-render(v,d,l);
-document.getElementById('lr').textContent='bijgewerkt '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-cd=REFRESH;
-}catch(err){eb.textContent='⚠ '+err.message;eb.style.display='block'}}
-function render(vs,ds,ls){
-const c=document.getElementById('content');
-if(!vs||!vs.length){c.innerHTML='<div class="empty">Geen actieve ventures</div>';return}
-c.innerHTML=vs.map(v=>{
-const b=(v.budget_total-(v.budget_spent||0)).toFixed(0);
-const vd=ds.filter(d=>d.venture_id===v.id).slice(0,8);
-const vl=ls.filter(l=>l.venture_id===v.id).slice(0,5);
-const it=(v.evolved_intent||v.original_intent||'').substring(0,130);
-const lr=vd.find(d=>d.reasoning&&d.reasoning!=='Geen redenering opgegeven');
-return'<div class="card">'+
-'<div class="top"><div>'+
-'<div class="name"><span style="color:var(--green)">●</span>'+e(v.project_name||'Venture')+'<span class="badge">TICK #'+v.loop_count+'</span></div>'+
-'<div class="intent">'+e(it)+(it.length>=130?'...':'')+'</div></div>'+
-'<div class="nl"><div class="nl-label">VOLGENDE LOOP</div><div class="nl-time">'+ft(v.next_loop_at)+'</div><div style="font-size:10px;color:var(--muted)">'+e(v.phase)+' fase</div></div></div>'+
-(lr?'<div class="rb">'+e(lr.reasoning.substring(0,200))+'</div>':'')+
-'<div class="grid">'+
-[['Budget','€'+b,'van €'+v.budget_total],['Omzet','€'+(v.revenue_total||0).toFixed(0),'totaal'],['Loops',v.loop_count,(v.loop_interval_minutes||'—')+'m interval'],['Contacten',v.contacts_discovered||0,(v.contacts_converted||0)+' conversies']].map(([n,val,sub])=>
-'<div class="stat"><div class="sl">'+n+'</div><div class="sv">'+val+'</div><div class="ss">'+sub+'</div></div>').join('')+'</div></div>'+
-(vd.length?'<div class="section"><div class="slabel">Recente acties</div>'+vd.map(d=>
-'<div class="dr"><div class="dm"><span class="ab">'+e(d.action_type)+'</span>'+
-(d.executed!==undefined?'<span class="'+(d.success?'ok':'fail')+'">'+(d.success?'✓ succes':'✗ fout')+'</span>':'')+
-'<span class="dt">'+ago(d.created_at)+'</span></div>'+
-(d.reasoning&&d.reasoning!=='Geen redenering opgegeven'?'<div class="dr-text">'+e(d.reasoning.substring(0,160))+'</div>':'')+'</div>').join('')+'</div>':'')+
-(vl.length?'<div class="section"><div class="slabel">Laatste inzichten</div>'+vl.map(l=>
-'<div class="li"><span style="color:var(--muted2)">›</span><span>'+e((l.insight||'').substring(0,180))+'</span></div>').join('')+'</div>':'');
-}).join('')}
-setInterval(()=>{cd--;document.getElementById('ct').textContent='refresh in '+cd+'s';if(cd<=0){cd=REFRESH;load()}},1000);
-load();
+const SB_URL='https://cpdlbkbbiwmzmfnqymbr.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZGxia2JiaXdtem1mbnF5bWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNTI3MTEsImV4cCI6MjA5MDcyODcxMX0.WUnWguuf_2gb6AcN1Zl-oy48knUrGobFt_AfL2SIUgw';
+const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+let evergreenData = null;
+let chatHistory = [];
+
+async function sbGet(table,q){
+  const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+q,{headers:H});
+  return r.json();
+}
+
+async function sbPatch(table,filter,body){
+  const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+async function callClaude(messages, system){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system: system,
+      messages: messages
+    })
+  });
+  const d=await r.json();
+  return d.content?.[0]?.text||'Geen antwoord';
+}
+
+async function fetchData(){
+  const[ventures,decisions,learnings]=await Promise.all([
+    sbGet('ventures','select=*&status=eq.active&order=created_at.desc'),
+    sbGet('decisions','select=*&order=created_at.desc&limit=15'),
+    sbGet('learnings','select=*&order=created_at.desc&limit=10')
+  ]);
+  return {ventures,decisions,learnings};
+}
+
+function dataToContext(data){
+  const v=data.ventures?.[0];
+  if(!v) return 'Geen actieve ventures gevonden.';
+  const dec=data.decisions?.filter(d=>d.venture_id===v.id)||[];
+  const learn=data.learnings?.filter(l=>l.venture_id===v.id)||[];
+  return `VENTURE: ${v.project_name} (TICK #${v.loop_count})
+INTENTIE: ${v.evolved_intent||v.original_intent}
+FASE: ${v.phase}
+BUDGET: €${(v.budget_total-(v.budget_spent||0)).toFixed(0)} resterend van €${v.budget_total}
+OMZET: €${(v.revenue_total||0).toFixed(0)}
+CONTACTEN: ${v.contacts_discovered||0} gevonden, ${v.contacts_converted||0} conversies
+VOLGENDE LOOP: ${v.next_loop_at}
+INTERVAL: ${v.loop_interval_minutes}m
+
+RECENTE ACTIES:
+${dec.slice(0,8).map(d=>`- ${d.action_type}: ${d.success?'succes':'fout'} | ${(d.reasoning||'').substring(0,100)}`).join('\n')}
+
+LAATSTE INZICHTEN:
+${learn.slice(0,5).map(l=>`- ${(l.insight||'').substring(0,120)}`).join('\n')}`;
+}
+
+async function refreshStatus(){
+  document.getElementById('status-panel').innerHTML='<div class="status-loading">Status laden...</div>';
+  try{
+    evergreenData=await fetchData();
+    const ctx=dataToContext(evergreenData);
+    const v=evergreenData.ventures?.[0];
+    
+    const summary=await callClaude([{role:'user',content:'Geef een korte heldere samenvatting in het Nederlands van wat Evergreen nu doet, of het goed gaat, en wat het grootste knelpunt is. Max 3 zinnen. Gebruik gewone taal, geen technische termen.'}],
+      'Jij bent de assistent van Evergreen, een autonoom AI-systeem dat een digitaal product bouwt. Hier is de huidige staat:\n\n'+ctx
+    );
+    
+    const budget=v?(v.budget_total-(v.budget_spent||0)).toFixed(0):'—';
+    document.getElementById('status-panel').innerHTML=`
+      <div class="status-content">${summary.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-lbl">TICK</span><span class="stat-val">#${v?.loop_count||0}</span></div>
+        <div class="stat"><span class="stat-lbl">BUDGET</span><span class="stat-val">€${budget}</span></div>
+        <div class="stat"><span class="stat-lbl">OMZET</span><span class="stat-val">€${(v?.revenue_total||0).toFixed(0)}</span></div>
+        <div class="stat"><span class="stat-lbl">LOOPS</span><span class="stat-val">${v?.loop_interval_minutes||'—'}m</span></div>
+      </div>`;
+    document.getElementById('last-upd').textContent='bijgewerkt '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    document.getElementById('status-panel').innerHTML='<div class="status-loading" style="color:var(--red)">Fout: '+e.message+'</div>';
+  }
+}
+
+function addMsg(text,type){
+  const chat=document.getElementById('chat-area');
+  const div=document.createElement('div');
+  div.className='msg '+type;
+  div.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+  return div;
+}
+
+function addTyping(){
+  const chat=document.getElementById('chat-area');
+  const div=document.createElement('div');
+  div.className='msg ai';
+  div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  div.id='typing-indicator';
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function removeTyping(){
+  const t=document.getElementById('typing-indicator');
+  if(t) t.remove();
+}
+
+async function handleCommand(cmd){
+  const parts=cmd.toLowerCase().trim().split(' ');
+  const verb=parts[0];
+  
+  if(verb==='/pause'||verb==='/stop'){
+    addMsg('⏸ Evergreen wordt gepauzeerd...','system');
+    const v=evergreenData?.ventures?.[0];
+    if(v){
+      await sbPatch('ventures','id=eq.'+v.id,{status:'paused'});
+      addMsg('✓ Evergreen is gepauzeerd. Gebruik /resume om te hervatten.','ai');
+    }
+  } else if(verb==='/resume'||verb==='/start'){
+    addMsg('▶ Evergreen wordt hervat...','system');
+    const v=evergreenData?.ventures?.[0];
+    if(v){
+      await sbPatch('ventures','id=eq.'+v.id,{status:'active'});
+      addMsg('✓ Evergreen is hervat.','ai');
+    }
+  } else if(verb==='/status'){
+    await refreshStatus();
+    addMsg('Status bijgewerkt.','system');
+  } else if(verb==='/pivot'){
+    const newDir=parts.slice(1).join(' ');
+    if(!newDir){addMsg('Gebruik: /pivot [nieuwe richting]','system');return;}
+    const v=evergreenData?.ventures?.[0];
+    if(v){
+      await sbPatch('ventures','id=eq.'+v.id,{evolved_intent:newDir});
+      addMsg('✓ Richting bijgewerkt naar: '+newDir,'ai');
+      evergreenData=await fetchData();
+    }
+  } else {
+    addMsg('Onbekend commando. Beschikbaar: /pause · /resume · /status · /pivot [richting]','system');
+  }
+}
+
+async function send(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text) return;
+  input.value='';
+  input.style.height='40px';
+  
+  if(text.startsWith('/')){
+    addMsg(text,'cmd');
+    await handleCommand(text);
+    return;
+  }
+  
+  addMsg(text,'user');
+  chatHistory.push({role:'user',content:text});
+  
+  addTyping();
+  
+  try{
+    if(!evergreenData) evergreenData=await fetchData();
+    const ctx=dataToContext(evergreenData);
+    
+    const reply=await callClaude(
+      chatHistory,
+      `Jij bent de assistent van Evergreen, een autonoom AI-systeem dat zoekt naar een digitaal product om te bouwen en verkopen. Je helpt de eigenaar het systeem te begrijpen.
+
+Antwoord altijd in het Nederlands. Wees direct en duidelijk. Geen technisch jargon.
+
+Als iemand wil dat Evergreen iets doet (pauzeren, andere richting, etc.) leg uit dat ze commando's kunnen gebruiken: /pause, /resume, /pivot [richting], /status.
+
+Huidige staat van Evergreen:
+${ctx}`
+    );
+    
+    removeTyping();
+    addMsg(reply,'ai');
+    chatHistory.push({role:'assistant',content:reply});
+    
+    if(chatHistory.length>20){chatHistory=chatHistory.slice(-20);}
+  }catch(e){
+    removeTyping();
+    addMsg('Fout bij het laden van antwoord: '+e.message,'ai');
+  }
+}
+
+// Auto-resize textarea
+document.getElementById('msg-input').addEventListener('input',function(){
+  this.style.height='40px';
+  this.style.height=Math.min(this.scrollHeight,100)+'px';
+});
+
+document.getElementById('msg-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
+});
+
+// Auto-refresh elke 5 minuten
+refreshStatus();
+setInterval(refreshStatus,5*60*1000);
 </script>
 </body>
 </html>
