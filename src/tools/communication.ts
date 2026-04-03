@@ -13,6 +13,10 @@ const logger = winston.createLogger({
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+const REPLY_TO = process.env.REPLY_TO_EMAIL || 'abdurrahimdaldal@gmail.com'
+const FROM_DOMAIN = process.env.RESEND_FROM_DOMAIN || 'creacraft.be'
+const FROM_ADDRESS = 'Evergreen <noreply@' + FROM_DOMAIN + '>'
+
 export class CommunicationTools {
 
   static async sendOutreachEmails(
@@ -39,35 +43,38 @@ export class CommunicationTools {
     for (const contact of toContact) {
       if (!contact.email) continue
 
-      const name = String(contact.name || 'Geachte')
-      const company = String(contact.company || '')
-      const intentText = String(venture.evolved_intent || venture.original_intent || '')
-      const projectName = String(venture.project_name || 'ons team')
+      const name = String(contact.name || 'there')
+      const projectName = String(venture.project_name || 'our team')
 
-      const emailContent = String(operational.content || '').length > 0
-        ? String(operational.content)
-        : 'Geachte ' + name + ',\n\nIk neem contact op omdat ik denk dat we waarde kunnen creëren.\n\n' +
-          intentText.substring(0, 200) + '\n\nZou u open staan voor een kort gesprek?\n\nMet vriendelijke groeten,\n' + projectName
+      // Always use English — strip any Dutch content from operational
+      const rawContent = String(operational.content || '')
+      const emailContent = rawContent.length > 20
+        ? rawContent
+        : 'Hi ' + name + ',\n\n' +
+          'I\'m an independent researcher building tools for solopreneurs. ' +
+          'I came across your work and wanted to ask you 3 quick questions — no pitch, just listening:\n\n' +
+          '1) What CRM or client management task takes up most of your time?\n' +
+          '2) Why don\'t existing tools solve this for you?\n' +
+          '3) How much would you pay monthly for a tool that actually fixes this?\n\n' +
+          'Takes 2 minutes to reply. Would really appreciate your perspective.\n\n' +
+          'Best,\n' + projectName
+
+      // Force English: replace common Dutch phrases if they slipped through
+      const englishContent = enforceEnglish(emailContent)
 
       try {
-        const fromEmail = String(venture.project_email || 'noreply@creacraft.be')
-        const domain = String(process.env.RESEND_FROM_DOMAIN || 'creacraft.be')
-
         await resend.emails.send({
-          from: 'Evergreen <noreply@' + domain + '>',
+          from: FROM_ADDRESS,
           to: contact.email,
-          subject: 'Samenwerking met ' + projectName,
-          html: '<html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333;">' +
-            emailContent.split('\n').map(function(line: string) {
-              return '<p style="margin:0 0 12px 0;">' + line + '</p>'
-            }).join('') +
-            '</body></html>'
+          replyTo: REPLY_TO,
+          subject: 'Quick question about your workflow (' + projectName + ')',
+          html: toHtml(englishContent)
         })
 
         await Memory.updateContactStatus(contact.id, 'contacted', {
           type: 'email_sent',
           date: new Date().toISOString(),
-          summary: 'Outreach email verstuurd'
+          summary: 'Outreach email sent (EN)'
         })
 
         sentCount++
@@ -85,7 +92,7 @@ export class CommunicationTools {
       success: sentCount > 0,
       output: { sent: sentCount, total_attempted: toContact.length },
       significance: sentCount > 0 ? 0.6 : 0.3,
-      learnings: sentCount + ' outreach emails verstuurd.',
+      learnings: sentCount + ' outreach emails verstuurd. Reply-to: ' + REPLY_TO,
       metricsImpact: { emails_sent: sentCount }
     }
   }
@@ -111,26 +118,32 @@ export class CommunicationTools {
     }
 
     let sentCount = 0
-    const domain = String(process.env.RESEND_FROM_DOMAIN || 'creacraft.be')
-    const projectName = String(venture.project_name || 'ons team')
-    const opContent = String(operational.content || 'Heeft u de kans gehad om mijn voorstel te bekijken?')
+    const projectName = String(venture.project_name || 'our team')
 
     for (const contact of needsFollowUp) {
       if (!contact.email) continue
-      const name = String(contact.name || '')
+      const name = String(contact.name || 'there')
+
+      const rawContent = String(operational.content || '')
+      const followUpContent = rawContent.length > 20
+        ? enforceEnglish(rawContent)
+        : 'Hi ' + name + ',\n\nJust following up on my previous message. ' +
+          'Did you get a chance to read it? Even a one-line reply would be super helpful.\n\n' +
+          'Best,\n' + projectName
 
       try {
         await resend.emails.send({
-          from: 'Evergreen <noreply@' + domain + '>',
+          from: FROM_ADDRESS,
           to: contact.email,
-          subject: 'Follow-up van ' + projectName,
-          html: '<html><body style="font-family:Arial,sans-serif;padding:20px;color:#333;"><p>Geachte ' + name + ',</p><p>' + opContent + '</p><p>Met vriendelijke groeten,<br>' + projectName + '</p></body></html>'
+          replyTo: REPLY_TO,
+          subject: 'Following up — quick question',
+          html: toHtml(followUpContent)
         })
 
         await Memory.updateContactStatus(contact.id, 'contacted', {
           type: 'email_sent',
           date: new Date().toISOString(),
-          summary: 'Follow-up verstuurd'
+          summary: 'Follow-up sent (EN)'
         })
 
         sentCount++
@@ -167,7 +180,7 @@ export class CommunicationTools {
   ): Promise<ExecutionResult> {
     logger.info('[COMM] Content aanmaken voor ' + platform)
 
-    const content = String(operational.content || 'Nieuwe inzichten over: ' + String(venture.original_intent || '').substring(0, 100))
+    const content = String(operational.content || 'New insights on: ' + String(venture.original_intent || '').substring(0, 100))
 
     logger.info('[CONTENT] Platform: ' + platform)
     logger.info('[CONTENT] Inhoud: ' + content.substring(0, 100))
@@ -183,3 +196,36 @@ export class CommunicationTools {
     }
   }
 }
+
+/**
+ * Converts plain text with newlines to simple HTML paragraphs
+ */
+function toHtml(text: string): string {
+  return '<html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333;">' +
+    text.split('\n').map(function(line: string) {
+      return '<p style="margin:0 0 12px 0;">' + (line.trim() || '&nbsp;') + '</p>'
+    }).join('') +
+    '</body></html>'
+}
+
+/**
+ * Best-effort Dutch → English phrase replacement for common patterns
+ * that Claude might produce in outreach content.
+ */
+function enforceEnglish(text: string): string {
+  return text
+    .replace(/Geachte/g, 'Dear')
+    .replace(/Met vriendelijke groeten/g, 'Best regards')
+    .replace(/Hallo,?/g, 'Hi,')
+    .replace(/Dag,?/g, 'Hi,')
+    .replace(/Bedankt/g, 'Thank you')
+    .replace(/voor uw tijd/g, 'for your time')
+    .replace(/Zou u open staan/g, 'Would you be open')
+    .replace(/een kort gesprek/g, 'a quick call')
+    .replace(/Ik neem contact op/g, 'I\'m reaching out')
+    .replace(/Ik ben een/g, 'I\'m an')
+    .replace(/onderzoeker/g, 'researcher')
+    .replace(/Samenwerking met/g, 'Collaboration with')
+}
+
+
